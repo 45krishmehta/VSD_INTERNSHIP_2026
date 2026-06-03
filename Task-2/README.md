@@ -242,7 +242,7 @@ This provides a much deeper understanding of how a RISC-V processor executes mac
 
 ---
 
-# Application of Digital Design Concepts – Elevator Controller FSM
+# Application of Digital Design Concepts (Elevator Controller FSM) and compiling it using GCC/RISC-V/SPIKE  
 
 To demonstrate a practical application of digital design concepts, a simple Elevator Controller was implemented using the Finite State Machine (FSM) approach.
 
