@@ -1,245 +1,196 @@
-# Task 1: Compilation of C Program using GCC and RISC-V GCC Compiler
+---
 
-## Overview
+# Assembly Generation and Optimization Analysis
 
-This task focuses on understanding the compilation process of a C program using both the native GCC compiler and the RISC-V GCC cross-compiler. The objective is to study how source code is translated into machine-level instructions and to analyze the generated RISC-V assembly code under different optimization levels.
+To understand how compiler optimizations affect the generated RISC-V machine code, the same C program was compiled using two different optimization levels:
+
+- `-O1`
+- `-Ofast`
+
+The generated binaries were then disassembled and compared.
 
 ---
 
-## Objective
+## RISC-V Compilation with O1 Optimization
 
-- Compile a C program using the GCC compiler.
-- Generate RISC-V assembly code using the RISC-V GCC toolchain.
-- Compare assembly outputs generated with different optimization levels.
-- Understand the role of compilation in the RISC-V software-to-hardware design flow.
+### Source Code Verification
 
----
-
-## Background
-
-A processor executes machine instructions, not high-level programming languages. Therefore, every C program must be translated into instructions understood by the target architecture.
-
-In this task, the target architecture is **RISC-V**, an open-source Instruction Set Architecture (ISA) widely used in modern processor design and research.
-
-The compilation flow helps bridge the gap between software development and processor implementation.
-
----
-
-## Verification Stages
-
-### O0 – Native GCC Compilation
-
-At this stage, the C program is compiled and executed using the standard GCC compiler on the host machine.
-
-#### Purpose
-
-- Generate the reference output.
-- Verify that the C program functions correctly.
-- Establish a baseline for comparison.
-
-#### Example Command
+Before compilation, the source code was verified using:
 
 ```bash
-gcc program.c -o program
-./program
+cat sum1ton.c
 ```
 
-#### Output
+### Screenshot
 
-Reference output generated from native execution.
+![O1 Source Code](assembly_o1_code.png)
 
----
-
-### O1 – RISC-V Cross Compilation
-
-The same C program is compiled using the RISC-V GCC cross-compiler.
-
-The generated assembly code is analyzed to understand how the compiler translates high-level code into RISC-V instructions.
-
-#### Purpose
-
-- Generate RISC-V assembly code.
-- Observe compiler optimizations.
-- Verify consistency with the reference implementation.
-
-#### Example Command
+### Compilation Command
 
 ```bash
-riscv64-unknown-elf-gcc -O1 -S program.c
+riscv64-unknown-elf-gcc -O1 -mabi=lp64 -march=rv64i -o sum1ton.o sum1ton.c
 ```
 
-#### Output
+### Binary Verification
 
-RISC-V assembly (.s) file and corresponding executable.
+```bash
+ls -ltr sum1ton.o
+```
+
+The successful generation of `sum1ton.o` confirms that the compilation process completed without errors.
 
 ---
 
-## Expected Validation
+### O1 Disassembly
 
-The functionality observed after RISC-V compilation should match the reference behavior obtained from native GCC execution.
+The generated binary was disassembled using:
 
-```text
-O0 = O1
+```bash
+riscv64-unknown-elf-objdump -d sum1ton.o
 ```
 
-Where:
+### Screenshot
 
-- O0 → Output generated using native GCC compilation.
-- O1 → Output corresponding to the RISC-V compiled implementation.
+![O1 Disassembly](assembly_O1_soln.png)
 
-If both outputs are identical, the verification is considered successful.
+### Analysis
 
-# Experiment: Compilation and Execution of a C Program using GCC and RISC-V Toolchain
+At `-O1`, the compiler performs basic optimizations while preserving readability and debuggability.
 
-## Objective
+Key observations:
 
-The objective of this experiment is to understand the compilation and execution flow of a simple C program using both the native GCC compiler and the RISC-V GCC cross-compiler. The generated executable is then simulated using the Spike RISC-V simulator to verify functional correctness.
+- Stack space is allocated using:
+
+```assembly
+addi sp,sp,-16
+```
+
+- Return address is stored on the stack:
+
+```assembly
+sd ra,8(sp)
+```
+
+- The value `100` is loaded into a register:
+
+```assembly
+li a5,100
+```
+
+- A loop structure is still visible in the generated assembly:
+
+```assembly
+addiw a5,a5,-1
+bnez a5,...
+```
+
+The compiler reduces some overhead while still keeping the overall loop implementation intact.
 
 ---
 
-## Program Description
+## RISC-V Compilation with Ofast Optimization
 
-A simple C program named `sum1ton.c` was created to calculate the sum of natural numbers from **1 to N**.
+### Compilation Command
 
-For this experiment:
-
-```c
-n = 100;
+```bash
+riscv64-unknown-elf-gcc -Ofast -mabi=lp64 -march=rv64i -o sum1ton.o sum1ton.c
 ```
 
-Therefore, the expected result is:
+### Binary Verification
+
+```bash
+ls -ltr sum1ton.o
+```
+
+### Screenshot
+
+![Ofast Compilation](ofast_code.png)
+
+---
+
+### Ofast Disassembly
+
+The generated binary was disassembled using:
+
+```bash
+riscv64-unknown-elf-objdump -d sum1ton.o
+```
+
+### Screenshot
+
+![Ofast Disassembly](ofast_asembly.png)
+
+### Analysis
+
+At `-Ofast`, the compiler applies aggressive optimization techniques.
+
+Several observations can be made:
+
+- The counting loop has been completely eliminated.
+- The compiler recognizes that:
 
 ```text
 1 + 2 + 3 + ... + 100 = 5050
 ```
 
+is a constant result.
+
+- Instead of generating instructions to perform 100 iterations, the compiler directly loads the final result.
+
+Examples:
+
+```assembly
+li a1,100
+```
+
+and
+
+```assembly
+lui
+addi
+```
+
+instructions are used to directly prepare values required by `printf()`.
+
+No loop instructions are present in the final code.
+
 ---
 
-## Editing the Source Code
+## O1 vs Ofast Comparison
 
-The source code was edited using the **Gedit Text Editor**.
-
-### Command Used
-
-```bash
-gedit sum1ton.c
-```
-
-### Screenshot
-
-![Editing sum1ton.c](gedit_sum1ton.png)
-
-The program initializes a variable `n` and uses a `for` loop to compute the cumulative sum from 1 to `n`. The final result is displayed using the `printf()` function.
+| Feature | O1 | Ofast |
+|----------|----------|----------|
+| Loop Present | Yes | No |
+| Stack Usage | Present | Present |
+| Runtime Computation | Yes | No |
+| Code Size | Larger | Smaller |
+| Execution Speed | Faster than O0 | Fastest |
+| Optimization Aggressiveness | Moderate | Very High |
 
 ---
 
-## O0 – Native GCC Compilation and Execution
+## Observation
 
-At this stage, the program is compiled using the native GCC compiler available on the host machine.
+The compiler optimization level has a significant impact on the generated assembly code.
 
-### Compilation Command
+For the O1 build, the compiler retains the loop structure and performs moderate optimizations.
 
-```bash
-gcc sum1ton.c
+For the Ofast build, the compiler recognizes that the result can be determined during compilation and replaces the entire loop with precomputed values, resulting in much shorter and more efficient assembly code.
+
+---
+
+## Validation
+
+Even though the generated assembly code differs significantly between O1 and Ofast:
+
+```text
+O1 Output = Ofast Output
 ```
 
-### Execution Command
-
-```bash
-./a.out
-```
-
-### Screenshot
-
-![GCC Compilation Output](gcc_soln.png)
-
-### Result
+Both implementations produce the same functional result:
 
 ```text
 Sum from 1 to 100 is 5050
 ```
 
-### Observation
-
-The successful execution confirms that the C program is functioning correctly. This output serves as the **reference output (O0)** for later verification.
-
----
-
-## O1 – RISC-V Cross Compilation
-
-The same source code is now compiled using the RISC-V GCC cross-compiler.
-
-### Compilation Command
-
-```bash
-riscv64-unknown-elf-gcc -o sum1ton.o sum1ton.c
-```
-
-This generates a RISC-V executable that can be executed on a RISC-V simulator.
-
----
-
-## Spike Simulation
-
-The generated RISC-V executable is executed using the Spike ISA simulator.
-
-### Simulation Command
-
-```bash
-spike pk sum1ton.o
-```
-
-### Screenshot
-
-![Spike Simulation](spike_sim.png)
-
-### Result
-
-```text
-Sum from 1 to 100 is 5050
-```
-
-### Observation
-
-The Spike simulator executes the RISC-V binary and produces the same output as the native GCC execution.
-
-This demonstrates that the RISC-V compiled implementation preserves the functionality of the original C program.
-
----
-
-## Verification
-
-The outputs obtained from both execution flows are compared.
-
-### Native GCC Output (O0)
-
-```text
-Sum from 1 to 100 is 5050
-```
-
-### RISC-V + Spike Output (O1)
-
-```text
-Sum from 1 to 100 is 5050
-```
-
-### Validation
-
-```text
-O0 = O1
-```
-
-Since both outputs are identical, the verification is successful.
-
----
-
-## Conclusion
-
-A C program for calculating the sum of natural numbers was successfully:
-
-1. Created and edited using Gedit.
-2. Compiled and executed using the native GCC compiler.
-3. Cross-compiled using the RISC-V GCC toolchain.
-4. Executed on the Spike RISC-V simulator.
-
-The outputs from both execution environments matched exactly, confirming the correctness of the RISC-V compilation and simulation flow.
+This confirms that compiler optimizations improve efficiency without changing the intended behavior of the program.
