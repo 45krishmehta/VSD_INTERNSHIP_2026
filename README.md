@@ -1,9 +1,8 @@
-# VSD Internship 2026
+# VSD RISC-V Internship 2026
 
 ## Basic Details
 
 **Name:** Krish Mehta
-
 **Email:** [24uec239@lnmiit.ac.in](mailto:your-email@example.com)
 
 ---
