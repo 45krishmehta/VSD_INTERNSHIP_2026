@@ -1,62 +1,18 @@
 # Task 2: SPIKE Simulation and Debugging using RISC-V GCC
 
-## Overview
+## Introduction
 
-This task focuses on understanding the execution and debugging of a RISC-V program using the SPIKE simulator. After compiling the program using the RISC-V GCC cross-compiler, the generated executable is executed and debugged using SPIKE. The objective is to observe instruction execution, inspect register values, and understand how a RISC-V processor executes machine instructions.
+After generating a RISC-V executable using the RISC-V GCC cross-compiler, the next step is to verify its execution and observe how the processor behaves internally.
 
----
+For this purpose, the SPIKE simulator is used. SPIKE is the official functional simulator for the RISC-V Instruction Set Architecture (ISA). It acts as a virtual RISC-V processor and allows RISC-V programs to be executed and debugged even without physical hardware.
 
-# Objective
-
-- Understand the purpose of the SPIKE simulator.
-- Compile a C program using the RISC-V GCC toolchain.
-- Execute the generated binary using SPIKE.
-- Debug the executable using SPIKE debug mode.
-- Observe register values during execution.
-- Analyze instruction-level execution.
-- Verify the correctness of the program output.
+In this task, the previously developed `sum1ton.c` program is executed using SPIKE and then analyzed using SPIKE's debugging mode to observe instruction execution and register modifications.
 
 ---
 
-# What is SPIKE?
+## Program Used
 
-SPIKE is the official functional simulator for the RISC-V Instruction Set Architecture (ISA).
-
-It acts as a virtual RISC-V processor capable of executing RISC-V binaries on a host machine. Instead of running the program on actual RISC-V hardware, SPIKE interprets and executes instructions in software.
-
-SPIKE is commonly used for:
-
-- Functional verification of RISC-V programs
-- Testing compiled RISC-V binaries
-- Instruction-level debugging
-- Software development before hardware availability
-- Processor verification and validation
-
-It serves as a reference model for many RISC-V hardware implementations.
-
----
-
-# Program Used
-
-The same `sum1ton.c` program developed in Task 1 is used for simulation and debugging.
-
-## Source Code
-
-```c
-#include <stdio.h>
-
-int main()
-{
-    int i, sum = 0, n = 100;
-
-    for(i = 1; i <= n; i++)
-        sum = sum + i;
-
-    printf("Sum from 1 to %d is %d\n", n, sum);
-
-    return 0;
-}
-```
+The program calculates the sum of natural numbers from 1 to 100.
 
 ### Expected Output
 
@@ -66,131 +22,71 @@ Sum from 1 to 100 is 5050
 
 ---
 
-# Native GCC Execution
+## SPIKE Simulation
 
-The source code is first compiled and executed using the native GCC compiler.
+The source code was first compiled using the RISC-V GCC cross-compiler.
 
-## Compilation Command
-
-```bash
-gcc sum1ton.c
-```
-
-## Execution Command
-
-```bash
-./a.out
-```
-
-### Output
-
-```text
-Sum from 1 to 100 is 5050
-```
-
-This output serves as the reference output.
-
----
-
-# RISC-V Compilation
-
-The source code is compiled using the RISC-V GCC cross-compiler.
-
-## Compilation Command
+### Compilation Command
 
 ```bash
 riscv64-unknown-elf-gcc -Ofast -mabi=lp64 -march=rv64i -o sum1ton.o sum1ton.c
 ```
 
-This generates a RISC-V executable that can be executed using the SPIKE simulator.
+The generated executable was then executed using SPIKE.
 
----
-
-# SPIKE Simulation
-
-The generated executable is executed using SPIKE.
-
-## Simulation Command
+### Simulation Command
 
 ```bash
 spike pk sum1ton.o
 ```
 
-## Screenshot
+### Screenshot
 
 ![SPIKE Simulation Output](gcc_spike_outpt.png)
 
-### Output
+### Observation
+
+The program executes successfully on the SPIKE simulator and produces:
 
 ```text
 Sum from 1 to 100 is 5050
 ```
+
+This confirms that the generated RISC-V executable behaves correctly and produces the same output as the native GCC implementation.
 
 ---
 
-# Verification
+## SPIKE Debugging
 
-### GCC Output
+One of the most useful features of SPIKE is its interactive debugging mode.
 
-```text
-Sum from 1 to 100 is 5050
-```
-
-### SPIKE Output
-
-```text
-Sum from 1 to 100 is 5050
-```
-
-### Validation
-
-```text
-GCC Output = SPIKE Output
-```
-
-Since both outputs are identical, the generated RISC-V executable is functionally correct.
-
----
-
-# Debugging using SPIKE
-
-SPIKE provides an interactive debug mode that allows instruction-by-instruction execution of a RISC-V program. This helps in understanding how individual instructions affect processor registers and memory during runtime.
-
-The debug mode is enabled using:
+The debugger can be launched using:
 
 ```bash
 spike -d pk sum1ton.o
 ```
 
-Once SPIKE enters debug mode, various commands can be used to inspect registers, monitor program execution, and stop execution at specific addresses.
+This mode allows instruction-by-instruction execution and provides visibility into register values and processor state.
 
 ---
 
-# Examining the Generated Assembly
+### Assembly Reference
 
-Before entering debug mode, the executable was disassembled to identify the instructions present inside the `main()` function.
-
-## Command
+Before debugging, the executable was disassembled to identify the instructions generated by the compiler.
 
 ```bash
 riscv64-unknown-elf-objdump -d sum1ton.o
 ```
 
-## Screenshot
-
 ![Assembly Reference](assembly_ref_debug.png)
 
-### Observation
-
-From the disassembly output:
-
-- The `main()` function starts at address:
+From the disassembly, the `main()` function begins at address:
 
 ```text
 0x100b0
 ```
 
-- The first few instructions executed are:
+The first few instructions executed by the processor are:
 
 ```assembly
 lui a2,0x1
@@ -202,170 +98,393 @@ li a1,100
 
 These instructions initialize registers and prepare the execution environment before the program proceeds further.
 
-The assembly listing serves as a reference during debugging because it allows us to identify the exact addresses where execution should be observed.
+The assembly listing serves as a reference during debugging because it allows us to correlate instruction addresses with actual processor activity.
 
 ---
 
-# Debugging Stack Pointer Modification
+### Observing Stack Allocation
 
-To observe stack allocation, SPIKE was instructed to execute until address:
+The debugger was instructed to stop execution at address:
 
 ```text
 0x100b8
 ```
 
-using:
+which corresponds to:
 
-```bash
-until pc 0 100b8
+```assembly
+addi sp, sp, -16
 ```
-
-The stack pointer register was then examined.
-
-## Screenshot
 
 ![Stack Pointer Debugging](debug_2.png)
 
-### Instruction Executed
+Before execution, the stack pointer contained:
+
+```text
+0x000000007f7e9b50
+```
+
+After executing the instruction:
 
 ```assembly
 addi sp, sp, -16
 ```
 
-### Register Observation
-
-Before execution:
+the stack pointer became:
 
 ```text
-sp = 0x000000007f7e9b50
+0x000000007f7e9b40
 ```
 
-After execution:
+### What Happened?
 
-```text
-sp = 0x000000007f7e9b40
-```
+The processor reserved 16 bytes of stack memory for the function.
 
-### Analysis
+This is a common operation performed at the beginning of a function. The stack space can later be used to store local variables, temporary data, and saved register values.
 
-The instruction:
-
-```assembly
-addi sp, sp, -16
-```
-
-subtracts 16 from the stack pointer.
-
-This allocates 16 bytes of stack memory for the function. Such stack allocation is commonly performed at the beginning of a function to store local variables and save important register values.
-
-This observation confirms that the processor correctly updates the stack pointer during function entry.
+The debugger clearly shows how a single instruction modifies the processor state.
 
 ---
 
-# Observing Register Updates
+### Observing Register Updates
 
-The debugger was next used to observe how registers change when instructions are executed.
-
-SPIKE was instructed to stop at the beginning of the `main()` function and register values were inspected after each instruction.
-
-## Screenshot
+The next step was to observe how registers change when instructions are executed.
 
 ![Register Debugging](debug_thrgh_spike.png)
 
-### Instruction 1
+The following instructions were executed:
+
+```assembly
+lui a2,0x1
+lui a0,0x21
+addi sp,sp,-16
+```
+
+The debugger allows register values to be inspected immediately after each instruction.
+
+#### Register a2
+
+Instruction:
 
 ```assembly
 lui a2,0x1
 ```
 
-Before execution:
+Value before execution:
 
 ```text
-a2 = 0x0000000000000000
+0x0000000000000000
 ```
 
-After execution:
+Value after execution:
 
 ```text
-a2 = 0x0000000000001000
+0x0000000000001000
 ```
 
-### Analysis
-
-The `lui` (Load Upper Immediate) instruction loads an immediate value into the upper bits of the register.
+The `lui` instruction loads an immediate value into the upper bits of the register.
 
 ---
 
-### Instruction 2
+#### Register a0
+
+Instruction:
 
 ```assembly
 lui a0,0x21
 ```
 
-After execution:
+Value after execution:
 
 ```text
-a0 = 0x0000000000021000
+0x0000000000021000
 ```
 
-### Analysis
-
-The register `a0` receives the upper immediate value specified by the instruction.
+This instruction prepares the register with an upper immediate value required later during program execution.
 
 ---
 
-### Instruction 3
+#### Stack Pointer Register
+
+Instruction:
 
 ```assembly
 addi sp,sp,-16
 ```
 
-After execution:
+Value after execution:
 
 ```text
-sp = 0x000000007f7e9b40
+0x000000007f7e9b40
 ```
 
-### Analysis
-
-The stack pointer is updated by subtracting 16 bytes, allocating stack space for program execution.
+The stack pointer is updated to allocate stack memory for the current function.
 
 ---
 
-# Overall Observation
+### Debugging Observation
 
 Using SPIKE debug mode, it was possible to:
 
 - Execute instructions one at a time.
-- Observe changes in register values.
+- Observe processor register values.
 - Monitor stack allocation.
-- Verify instruction behavior.
-- Correlate assembly instructions with processor state changes.
+- Track instruction execution.
+- Correlate assembly instructions with hardware behavior.
 
-The debugger provides a detailed view of how a RISC-V processor executes machine instructions internally.
+This provides a much deeper understanding of how a RISC-V processor executes machine instructions internally.
+
+
+
+
 
 ---
 
-# Final Verification
+---
 
-| Method | Output |
-|----------|----------|
-| GCC Execution | Sum from 1 to 100 is 5050 |
-| SPIKE Execution | Sum from 1 to 100 is 5050 |
-| SPIKE Debug Execution | Sum from 1 to 100 is 5050 |
+# Application of Digital Design Concepts – Elevator Controller FSM
+
+To demonstrate a practical application of digital design concepts, a simple Elevator Controller was implemented using the Finite State Machine (FSM) approach.
+
+An FSM consists of a set of states, transitions, inputs, and outputs. The elevator controller naturally follows FSM behavior because it changes states depending on the current floor and the requested destination floor.
+
+---
+
+## FSM Description
+
+The elevator operates between floors 0 and 9.
+
+### States
+
+- Idle
+- Door Closing
+- Moving Up
+- Moving Down
+- Door Opening
+
+### State Transition Flow
 
 ```text
-GCC = SPIKE = SPIKE Debug
+Idle
+ |
+ v
+Door Closing
+ |
+ +-----> Moving Up ------+
+ |                       |
+ +-----> Moving Down ----+
+                         |
+                         v
+                   Door Opening
+                         |
+                         v
+                        Idle
 ```
-
-All executions produce identical results.
 
 ---
 
-# Conclusion
+## C Program Development
 
-In this task, a RISC-V executable was successfully generated using the RISC-V GCC cross-compiler and executed using the SPIKE simulator. The output obtained from SPIKE matched the output generated by native GCC execution, confirming the correctness of the compiled program.
+The elevator controller program was created and edited using the gedit text editor.
 
-The SPIKE debug mode was then used to observe instruction-level execution, inspect register contents, monitor stack pointer updates, and trace program behavior. This demonstrated how SPIKE can be used not only for simulation but also for detailed debugging and verification of RISC-V applications.
+### Source Code Screenshot
 
-The experiment highlights the importance of SPIKE as a powerful tool for understanding, validating, and debugging RISC-V software before deployment on actual hardware.
+![Elevator Code](gedit_elevator_code.png)
+
+### Source Code
+
+```c
+#include <stdio.h>
+
+int main()
+{
+    int current_floor = 0;
+    int target_floor;
+
+    printf("Elevator Controller\n");
+    printf("Building Floors: 0 - 9\n");
+    printf("Current Floor: %d\n", current_floor);
+
+    printf("\nEnter Target Floor: ");
+    scanf("%d", &target_floor);
+
+    if (target_floor < 0 || target_floor > 9)
+    {
+        printf("Invalid Floor!\n");
+        return 0;
+    }
+
+    printf("\nDoor Closing...\n");
+
+    if (target_floor > current_floor)
+    {
+        while (current_floor < target_floor)
+        {
+            current_floor++;
+            printf("Moving Up -> Floor %d\n", current_floor);
+        }
+    }
+    else
+    {
+        while (current_floor > target_floor)
+        {
+            current_floor--;
+            printf("Moving Down -> Floor %d\n", current_floor);
+        }
+    }
+
+    printf("Reached Floor %d\n", current_floor);
+    printf("Door Opening...\n");
+
+    return 0;
+}
+```
+
+---
+
+## GCC Compilation and Execution
+
+The program was first compiled using the native GCC compiler and executed on the host system.
+
+### Commands
+
+```bash
+gcc elevator.c
+./a.out
+```
+
+### Output
+
+![GCC Output](gcc_output_elevator.png)
+
+### Observation
+
+The elevator starts at Floor 0 and moves step-by-step toward the requested floor. For the test case shown, the target floor was 8 and the elevator successfully reached the destination before opening the door.
+
+---
+
+## RISC-V Compilation using GCC Cross Compiler
+
+The program was then compiled for the RISC-V architecture using the RISC-V GCC cross-compiler.
+
+### O1 Compilation
+
+```bash
+riscv64-unknown-elf-gcc -O1 -mabi=lp64 -march=rv64i -o elevator.o elevator.c
+```
+
+### Generated Object File
+
+![O1 Object Generation](o1_obj_elevator.png)
+
+---
+
+## O1 Assembly Analysis
+
+The generated executable was disassembled to inspect the assembly instructions generated by the compiler.
+
+### Command
+
+```bash
+riscv64-unknown-elf-objdump -d elevator.o
+```
+
+### Assembly Output
+
+![O1 Assembly](obj_01_code_elevator.png)
+
+### Observation
+
+The assembly listing shows the low-level instructions generated from the C program. Instructions such as:
+
+```assembly
+lui
+addi
+jal
+lw
+beq
+```
+
+are used for register initialization, arithmetic operations, conditional branching, function calls, and memory access.
+
+---
+
+## Ofast Compilation
+
+The program was also compiled using aggressive compiler optimizations.
+
+### Command
+
+```bash
+riscv64-unknown-elf-gcc -Ofast -mabi=lp64 -march=rv64i -o elevator.o elevator.c
+```
+
+### Generated Object File
+
+![Ofast Object Generation](0fast_elevator_code.png)
+
+---
+
+## Ofast Assembly Analysis
+
+The optimized executable was disassembled to observe the effect of compiler optimizations.
+
+### Assembly Output
+
+![Ofast Assembly](0fast_elevator_output.png)
+
+### Observation
+
+With the Ofast optimization level enabled, the compiler performs aggressive optimizations to improve execution speed. The generated assembly may contain fewer instructions and more efficient control flow compared to lower optimization levels.
+
+---
+
+## SPIKE Simulation
+
+The generated RISC-V executable was executed using the SPIKE simulator.
+
+### Command
+
+```bash
+spike pk elevator.o
+```
+
+### Output
+
+![SPIKE Output](spike_elevatot.png)
+
+### Observation
+
+The SPIKE simulator successfully executed the RISC-V binary and produced the same behavior observed during native GCC execution.
+
+The elevator moved sequentially through the floors:
+
+```text
+0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
+```
+
+before reaching the target floor and opening the door.
+
+This confirms that the RISC-V executable generated by the cross-compiler behaves correctly when executed on a RISC-V simulation environment.
+
+---
+
+## Summary
+
+| Stage | Result |
+|---------|---------|
+| GCC Compilation | Successful |
+| GCC Execution | Successful |
+| RISC-V O1 Compilation | Successful |
+| RISC-V O1 Disassembly | Successful |
+| RISC-V Ofast Compilation | Successful |
+| RISC-V Ofast Disassembly | Successful |
+| SPIKE Simulation | Successful |
+
+The Elevator Controller FSM successfully demonstrates how a digital design concept can be modeled in C, compiled for the RISC-V architecture, analyzed at the assembly level, and validated using the SPIKE simulator.
+
+## Conclusion
+
+The generated RISC-V executable was successfully executed using the SPIKE simulator and verified against the native GCC output.
+
+Using SPIKE's debugging mode, it was possible to inspect register contents, monitor stack pointer updates, and observe instruction execution at a low level. The experiment demonstrated how SPIKE can be used not only for simulation but also as a powerful debugging tool for understanding and validating RISC-V software.
