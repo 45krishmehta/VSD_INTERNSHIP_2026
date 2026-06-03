@@ -3,6 +3,7 @@
 ## Basic Details
 
 **Name:** Krish Mehta
+
 **Email:** [24uec239@lnmiit.ac.in](mailto:your-email@example.com)
 
 ---
