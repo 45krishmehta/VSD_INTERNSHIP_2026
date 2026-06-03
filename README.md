@@ -13,5 +13,5 @@ This repository contains all tasks, reports, screenshots, assembly analysis, and
 ### Tasks
 
 * Task 1: Compilation of C Program using GCC , SPIKE and RISC-V GCC Compiler
-* Task 2: Coming Soon
+* Task 2: SPIKE Simulation and Debugging using RISC-V GCC 
 
