@@ -221,53 +221,380 @@ The `make build` command automatically performs synthesis, placement, routing, t
 
 ![Build Output](make_build_long_outpt.png)
 
-## 3.7 Verify the RISC-V Logo Output
+### Step 4: Flash to FPGA
 
-After successfully generating the firmware image and completing the FPGA build process, the default **VSDSquadron FPGA Mini** ASCII banner is displayed during execution. The appearance of this banner confirms that the firmware has been built correctly and that the RISC-V environment is functioning as expected.
+Once the firmware and FPGA bitstream are generated successfully, the next step is to flash the design onto the VSDSquadron FPGA board. The flashing process uses the generated **SOC.bin** file and attempts to program the FPGA through the connected USB interface.
 
-The output was verified in both **GitHub Codespace** and **Oracle Virtual Machine**, while the corresponding firmware source was also reviewed to understand how the banner is generated.
+### Command Used
 
----
+```bash
+sudo make flash
+```
 
-### Firmware Source (`riscv_logo.c`)
+The `make flash` command invokes the programming utility (`iceprog`) to transfer the generated bitstream to the FPGA board.
 
-The `riscv_logo.c` file contains the implementation responsible for printing the VSDSquadron FPGA Mini ASCII banner along with the required delay and screen refresh functionality.
+### Output
 
-![RISC-V Logo Source Code](banner_output_code.png)
-
----
-
-### Output in GitHub Codespace
-
-After executing the previous build steps, the firmware displays the following banner in the GitHub Codespace terminal.
-
-![RISC-V Logo in GitHub Codespace](banner_op_github_terminal.png)
+![Flash Output](step4_sudomake_terminal_vm.png)
 
 ---
 
-### Output in Oracle Virtual Machine
+## Explanation
 
-The same firmware was also executed in the Oracle Virtual Machine environment, producing an identical ASCII banner and confirming consistent behavior across both development platforms.
+During execution, the flashing utility attempted to establish communication with the FPGA board but returned the following message:
 
-![RISC-V Logo in Oracle VM](ascii_banner.png)
+```text
+Can't find ICE FTDI USB device
+ABORT.
+make: *** [Makefile:21: flash] Error 2
+```
+
+
+This message indicates that the flashing tool could not detect the required FTDI USB interface.
+
+In this case, the **VSDSquadron FPGA board was not physically connected to the system**, so the programmer was unable to establish communication and the flashing process was terminated.
+
+---
+
+### Step 5: Verify the RISC-V Logo Output
+
+After successfully generating the firmware and completing the build process, the default **VSDSquadron FPGA Mini** ASCII banner can be verified directly within the GitHub Codespace environment.
+
+This step confirms that the firmware is correctly built and that the RISC-V application executes as expected, producing the intended terminal output.
+
+---
+
+### Review the Firmware Source
+
+The `riscv_logo.c` file contains the implementation responsible for displaying the VSDSquadron FPGA Mini ASCII banner. The source file can be viewed using the following command:
+
+```bash
+cd ~/vsdfpga_labs/basicRISCV/Firmware
+
+cat riscv_logo.c
+```
+
+The `cat` command prints the contents of the source file directly in the terminal, allowing the banner implementation to be verified without modifying the program.
+
+---
+
+### Verify the Output in GitHub Codespace
+
+After executing the previous firmware generation and build steps, the RISC-V application displays the default VSDSquadron FPGA Mini ASCII banner in the GitHub Codespace terminal.
+
+### Output
+
+![RISC-V Logo Output in GitHub Codespace](banner_op_github_terminal.png)
 
 ---
 
 ## Observations
 
-- Successfully verified the `riscv_logo.c` firmware implementation.
-- The default VSDSquadron FPGA Mini ASCII banner was generated correctly.
-- The output remained consistent across both GitHub Codespace and Oracle Virtual Machine.
-- The successful execution confirms that the firmware generation and build flow completed without any critical errors.
+- Successfully accessed the `riscv_logo.c` firmware source.
+- Verified the implementation responsible for generating the ASCII banner.
+- The expected VSDSquadron FPGA Mini banner was displayed correctly in the GitHub Codespace terminal.
+- The output confirms successful firmware generation and execution.
 
 ---
 
-## Result
+# Step 4: Local Machine Preparation (Strongly Encouraged)
 
-- ✅ Firmware verified successfully.
-- ✅ Expected RISC-V ASCII banner displayed correctly.
-- ✅ Output validated in GitHub Codespace.
-- ✅ Output validated in Oracle Virtual Machine.
+To prepare the local development environment for future FPGA experiments, the required repositories and project structure were verified on the Oracle Virtual Machine. This ensures that all subsequent FPGA compilation and execution tasks can be performed locally without relying solely on GitHub Codespaces.
 
 ---
 
+## 4.1 Verify the Local Workspace
+
+The previously cloned **vsdfpga_labs** repository was accessed from the local machine, and the required project directories were verified.
+
+### Commands Used
+
+```bash
+cd ~/vsdfpga_labs/basicRISCV/Firmware
+
+cd ~/vsdfpga_labs/basicRISCV/RTL
+```
+
+The first command navigates to the **Firmware** directory containing the RISC-V application source files, while the second command switches to the **RTL** directory containing the Verilog design files and build scripts.
+
+### Output
+
+![Local Workspace Verification](vm_setup_step4.png)
+
+---
+
+## 4.2 Verify the RISC-V Banner Program
+
+The default **VSDSquadron FPGA Mini** ASCII banner was successfully verified on the local Oracle Virtual Machine environment. The banner confirms that the firmware and local development setup are functioning correctly.
+
+### Firmware Source
+
+The `riscv_logo.c` file contains the implementation responsible for displaying the ASCII banner.
+
+![Firmware Source](banner_output_code.png)
+
+---
+
+### RISCV Banner Output on Oracle Virtual Machine
+
+The following output was observed after executing the previously generated firmware on the local machine.
+
+![RISC-V Banner Output](ascii_banner.png)
+
+---
+
+# Understanding the RISC-V Reference Design
+
+This document summarizes the key concepts explored while working with the **vsd-riscv2** repository. It provides a concise overview of the program structure, compilation flow, memory organization, and the logical integration of custom FPGA IP blocks.
+
+---
+
+# 1. Where is the RISC-V program located in the `vsd-riscv2` repository?
+
+The RISC-V reference program is located inside the **`samples`** directory of the `vsd-riscv2` repository. This directory contains sample source files along with the necessary build scripts used to understand and verify the RISC-V compilation and execution flow.
+
+The sample programs are designed to demonstrate basic RISC-V functionality and can be compiled using both the native GCC compiler and the RISC-V cross-compilation toolchain. The accompanying Makefile simplifies the build process by automating compilation and linking steps.
+
+During this task, the `samples` directory was used to access and execute the reference program, making it the primary workspace for learning the RISC-V software flow within the repository.
+
+---
+
+# 2. How is the program compiled and loaded into memory?
+
+The source code is first compiled using the RISC-V cross compiler, producing an executable object file.
+
+```bash
+riscv64-unknown-elf-gcc -o sum1ton.o sum1ton.c
+```
+
+The generated executable is then loaded and executed through the Spike simulator using the Proxy Kernel.
+
+```bash
+spike pk sum1ton.o
+```
+
+### Execution Flow
+
+```
+C Source File
+      │
+      ▼
+RISC-V Cross Compiler
+      │
+      ▼
+Executable Object File
+      │
+      ▼
+Spike + Proxy Kernel
+      │
+      ▼
+Program Loaded into Memory
+      │
+      ▼
+Execution
+```
+
+---
+
+# 3. How does the RISC-V core access memory and memory-mapped I/O?
+
+The RISC-V processor follows a **memory-mapped I/O (MMIO)** architecture, where hardware peripherals are assigned unique memory addresses.
+
+Instead of using dedicated input/output instructions, the processor interacts with peripherals through standard load and store operations.
+
+### Memory Organization
+
+```
+                +----------------+
+                |   RISC-V Core  |
+                +----------------+
+                         |
+                -------------------
+                |                 |
+                ▼                 ▼
+         Program Memory    Memory-Mapped I/O
+                                   |
+              --------------------------------------
+              |           |            |           |
+              ▼           ▼            ▼           ▼
+            UART        GPIO         Timer     Other Peripherals
+```
+
+This architecture provides a simple and uniform interface between software and hardware.
+
+---
+
+# 4. Where would a new FPGA IP block logically integrate in this system?
+
+A new FPGA IP block would be connected as a **memory-mapped peripheral** on the system bus.
+
+The processor can communicate with the IP block by reading from or writing to its assigned address range, allowing software to control custom hardware modules without modifying the processor core.
+
+### Logical Integration
+
+```
+                     +------------------+
+                     |    RISC-V Core   |
+                     +------------------+
+                              |
+                       System Bus / MMIO
+                              |
+      -------------------------------------------------
+      |                 |               |             |
+      ▼                 ▼               ▼             ▼
+ Program Memory       UART            GPIO      Custom FPGA IP
+                                                 (New Module)
+```
+
+This modular architecture allows additional hardware accelerators and peripherals to be integrated seamlessly into the existing system.
+
+---
+
+# Optional Confidence Task
+
+This optional task demonstrates the ability to understand, modify, and rebuild an existing RISC-V firmware application. Instead of modifying `riscv_logo.c`, the **`mandel.c`** source file was explored and updated to observe the effect of changing program constants.
+
+---
+
+## Step 1: Open the Firmware Source
+
+Navigate to the RTL directory and open the `mandel.c` source file located inside the Firmware folder.
+
+### Command Used
+
+```bash
+nano ../Firmware/mandel.c
+```
+
+This command opens the Mandelbrot firmware source in the Nano text editor, allowing the program constants to be reviewed and modified.
+
+### Source File
+
+![mandel.c Source](mandle.c_optional_initial_state.png)
+
+---
+
+## Step 2: Modify Program Constants
+
+The display resolution constants were updated from their default values:
+
+```c
+#define W 46
+#define H 46
+```
+
+to
+
+```c
+#define W 100
+#define H 1000
+```
+
+This modification changes the dimensions used by the Mandelbrot rendering algorithm, demonstrating how altering compile-time constants affects the firmware behavior.
+
+## Step 3: Save and Rebuild the Project
+
+After making the required changes, the project was rebuilt to generate an updated firmware image.
+
+### Commands Used
+
+```bash
+make clean
+
+make build
+```
+
+- `make clean` removes previously generated build files.
+- `make build` recompiles the firmware and rebuilds the FPGA design using the updated source code.
+
+### Commands Executed
+
+![Build Commands](optional_code.png)
+
+---
+
+## Step 4: Verify the Updated Source
+
+After rebuilding, the modified `mandel.c` file was reviewed to confirm that the updated constants were successfully saved.
+
+### Verification
+
+![Updated mandel.c](optional_mandle_final_change.png)
+
+---
+
+# Overview of Optional Task
+
+## File Modified
+
+`mandel.c`
+
+---
+
+## Original Configuration
+
+```c
+#define W 46
+#define H 46
+```
+
+---
+
+## Modified Configuration
+
+```c
+#define W 100
+#define H 1000
+```
+
+---
+
+## Commands Executed
+
+```bash
+nano ../Firmware/mandel.c
+
+make clean
+
+make build
+```
+
+---
+
+## Observation of Optional Task
+
+As part of the optional confidence task, the `mandel.c` firmware was selected to demonstrate source-level customization within the VSDFPGA environment. The rendering dimension constants (`W` and `H`) were modified from their default values to new values (`100` and `1000`) and the project was rebuilt using the standard build process.
+
+The updated source was compiled successfully without any build errors, confirming that the firmware modifications were correctly integrated into the FPGA build flow. This exercise highlights the ease of modifying application parameters and regenerating the firmware while maintaining a consistent development workflow.
+
+# Observations of Task-3
+
+Throughout this task, the complete RISC-V reference workflow was explored and verified before attempting any hardware-specific implementation. The development environment was successfully configured in both **GitHub Codespaces** and the **Oracle Virtual Machine**, providing a stable and reproducible setup for firmware development.
+
+The reference RISC-V programs were compiled and executed successfully using the provided toolchain, validating that the software environment was functioning correctly. The VSDFPGA Labs repository was cloned, the firmware was generated, and the FPGA build flow completed successfully without any compilation issues.
+
+As part of the optional confidence task, the `mandel.c` firmware source was examined and its compile-time constants were modified. The project rebuilt successfully after these changes, demonstrating that firmware parameters can be customized while preserving the integrity of the build process.
+
+The FPGA flashing step could not be completed because the VSDSquadron FPGA board was not physically connected to the system. However, the generated bitstream and firmware images confirmed that the software and build environment were correctly configured and ready for hardware deployment.
+
+This workflow closely reflects the standard methodology followed by semiconductor and FPGA development teams:
+
+- **Environment first** – Establish a stable and reproducible development environment before beginning implementation.
+- **Reference design validation** – Verify the provided reference design and ensure the complete build flow works as expected.
+- **Understanding before modification** – Study and validate the existing firmware before making any source-level changes.
+- **Hardware later, not first** – Complete software validation and build verification before programming or debugging the physical FPGA board.
+
+---
+
+# Results of Task-3
+
+- ✅ Successfully configured the RISC-V development environment in GitHub Codespaces and Oracle Virtual Machine.
+- ✅ Verified the reference RISC-V software execution flow using the provided sample programs.
+- ✅ Successfully cloned and explored the VSDFPGA Labs repository.
+- ✅ Generated firmware and completed the FPGA build process without compilation errors.
+- ✅ Verified the default VSDSquadron FPGA Mini ASCII banner execution.
+- ✅ Successfully modified and rebuilt the `mandel.c` firmware as part of the optional confidence task.
+- ✅ Gained a clear understanding of the RISC-V compilation flow, firmware organization, and memory-mapped architecture.
+- ⚠️ FPGA flashing could not be performed because the VSDSquadron FPGA board was not connected, although the generated build artifacts confirmed that the design was ready for deployment.
+
+Overall, the task successfully established a strong software foundation for future FPGA development by emphasizing environment setup, reference design validation, source-level understanding, and systematic verification before hardware interaction.
