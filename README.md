@@ -10,10 +10,16 @@
 
 This repository contains all tasks, reports, screenshots, assembly analysis, and project work completed during the VSD Internship 2026.
 
-## 📚 Tasks
+## 📚 Tasks Overview
 
-| Task | Description |
-|-------|-------------|
-| **Task 1** | 🔗 [Compilation of C Program using GCC, SPIKE and RISC-V GCC Compiler](./Task-1/README.md) |
-| **Task 2** | 🔗 [SPIKE Simulation and Debugging using RISC-V GCC](./Task-2/README.md) |
-| **Task 3** | 🔗 [Environment Setup & RISC-V Reference Bring-Up](./Task-3/README.md) |
+### 🔹 [Task 1: RISC-V Compilation](./Task-1/README.md)
+
+...
+
+### 🔹 [Task 2: Spike Simulation & Debugging](./Task-2/README.md)
+
+...
+
+### 🔹 [Task 3: Environment Setup & RISC-V Reference Bring-Up](./Task-3/README.md)
+
+...
