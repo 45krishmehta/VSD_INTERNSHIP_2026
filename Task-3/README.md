@@ -6,7 +6,7 @@ This task establishes a reliable RISC-V development environment and verifies the
 
 # Objective
 
-Ssmgfnds,nuccessfully configure the development environment and validate the RISC-V reference flow by compiling and executing a sample program using both the native compiler and the RISC-V toolchain.
+Successfully configure the development environment and validate the RISC-V reference flow by compiling and executing a sample program using both the native compiler and the RISC-V toolchain.
 
 This task focuses on:
 
