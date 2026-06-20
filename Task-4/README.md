@@ -1,4 +1,4 @@
-# Task-2: Design & Integrate Your First Memory-Mapped IP
+# Task-4: Design & Integrate Your First Memory-Mapped IP
 
 ## Overview
 
