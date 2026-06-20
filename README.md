@@ -21,3 +21,4 @@ This repository contains all tasks, reports, screenshots, assembly analysis, and
 ### 🔹 [Task 3: Environment Setup & RISC-V Reference Bring-Up](./Task-3/README.md)
 
 
+### 🔹 [Task 4:  Design & Integrate Your First Memory-Mapped IP](./Task-4/README.md)
