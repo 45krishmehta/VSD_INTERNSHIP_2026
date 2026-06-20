@@ -633,6 +633,73 @@ The testbench writes a value into the GPIO register and immediately performs a r
 - ✅ Readback returned the same stored value.
 - ✅ Simulation displayed **GPIO TEST PASSED**, validating correct register updates and readback behavior.
 
+
+# Short Explanation
+
+## Address Used
+
+The GPIO IP is integrated as a memory-mapped peripheral inside the RISC-V SoC.
+
+- **GPIO Address Bit:** `IO_GPIO_bit = 3`
+- **Register:** 32-bit GPIO Output Register
+- **Access Type:** Memory-Mapped I/O
+
+The processor accesses the GPIO register using the dedicated GPIO address decode logic implemented in `riscv.v`.
+
+---
+
+## How CPU Accesses the IP
+
+The CPU communicates with the GPIO IP through the existing memory bus.
+
+```
+CPU
+ │
+ │ mem_addr
+ ▼
+Address Decode (IO_GPIO_bit)
+ │
+ ├── write_enable
+ ├── read_enable
+ │
+ ▼
+GPIO Register
+ │
+ ├── gpio_out
+ └── read_data
+```
+
+- `mem_addr` selects the GPIO peripheral.
+- `mem_wdata` writes data into the GPIO register.
+- `write_enable` updates the stored value.
+- `read_enable` returns the stored value through `read_data`.
+- `gpio_out` reflects the current register value.
+
+---
+
+## What Was Validated in Simulation
+
+The GPIO IP was validated using Icarus Verilog and GTKWave.
+
+### Verified Operations
+
+- ✅ Register stores the written value correctly.
+- ✅ `gpio_out` updates after a write operation.
+- ✅ Readback returns the same value stored in the register.
+- ✅ Testbench comparison reports **GPIO TEST PASSED**.
+- ✅ GTKWave confirms correct timing of `clk`, `write_en`, `read_en`, `write_data`, `gpio_out`, and `read_data`.
+
+Simulation Output:
+
+```
+GPIO WRITE VALUE = 000000A5
+GPIO READ VALUE  = 000000A5
+
+GPIO TEST PASSED
+```
+
+This confirms that the GPIO IP performs correct write and read operations and is successfully integrated into the RISC-V SoC.
+
 # Step 5: Hardware Validation (Optional)
 
 ## Objective
