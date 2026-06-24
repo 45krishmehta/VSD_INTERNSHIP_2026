@@ -22,3 +22,6 @@ This repository contains all tasks, reports, screenshots, assembly analysis, and
 
 
 ### 🔹 [Task 4:  Design & Integrate Your First Memory-Mapped IP](./Task-4/README.md)
+
+
+### 🔹 [Task 5:  Design a Multi-Register GPIO IP with Software Control](./Task-5/README.md)
