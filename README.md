@@ -1,5 +1,14 @@
 # VSD RISC-V Internship 2026
 
+# GPIO Peripheral Design for VSD RISC-V SoC
+
+![Verilog](https://img.shields.io/badge/Language-Verilog-blue)
+![RISC--V](https://img.shields.io/badge/RISC--V-SoC-red)
+![FPGA](https://img.shields.io/badge/FPGA-Project-success)
+![Status](https://img.shields.io/badge/Status-Completed-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
+---
 ## Basic Details
 
 **Name:** Krish Mehta
