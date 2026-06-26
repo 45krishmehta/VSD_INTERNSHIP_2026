@@ -269,34 +269,24 @@ The existing GPIO IP was successfully analyzed, and a complete multi-register ar
 
 ## Objective
 
-This step extends the original single-register GPIO IP into a multi-register GPIO peripheral supporting independent data, direction, and readback registers through address decoding.
-
-Key features implemented:
-
-- GPIO_DATA register
-- GPIO_DIR register
-- GPIO_READ register
-- Register selection logic
-- Synchronous write operation
-- Combinational read operation
+The GPIO IP was extended from a single-register design to a multi-register peripheral supporting independent data, direction, and readback registers. Address decoding was implemented using a register selection signal while maintaining clean synchronous RTL and correct read/write behavior.
 
 ---
 
-## Backup of Original Design
+## Backup of Original GPIO IP
 
 Before modifying the RTL, a backup of the original GPIO IP was created.
 
 ```bash
+cd ~/vsdfpga_labs/basicRISCV/RTL
 cp gpio_ip.v gpio_ip_task4_backup.v
 ```
 
 ![GPIO Backup](step2_1_backup_gpio_creaated.png)
 
-This allows the original design to be restored if required.
-
 ---
 
-## Original GPIO RTL Review
+## Original GPIO RTL
 
 The original GPIO IP contained only one register:
 
@@ -304,51 +294,28 @@ The original GPIO IP contained only one register:
 reg [31:0] gpio_reg;
 ```
 
-It was responsible for:
-
-- GPIO data storage
-- Readback
-- GPIO output generation
-
-Since a single register handled all operations, separate direction control was not supported.
+This register handled GPIO output storage, readback, and output generation, making the design unsuitable for multiple register access.
 
 ![Original GPIO RTL](step2_2_original_gpio_ip.png)
 
 ---
 
-# RTL Modifications
+# Multi-Register GPIO RTL
 
-The GPIO architecture was updated to support multiple internal registers.
+The GPIO IP was updated by introducing:
 
-## Register Interface
-
-A register selection signal was introduced.
+- GPIO_DATA register
+- GPIO_DIR register
+- Register selection (`reg_sel`)
 
 ```verilog
 input [1:0] reg_sel;
-```
 
-`reg_sel` selects the internal register to be accessed.
-
----
-
-## Internal Registers
-
-```verilog
 reg [31:0] gpio_data;
 reg [31:0] gpio_dir;
 ```
 
-| Register | Function |
-|-----------|----------|
-| gpio_data | Stores GPIO output data |
-| gpio_dir | Stores GPIO direction |
-
----
-
-## Multi-Register GPIO RTL
-
-The updated RTL implementation is shown below.
+Updated RTL:
 
 ![Multi Register GPIO RTL](step2_3a_multireg_gpio_rtl.png)
 
@@ -358,20 +325,13 @@ The updated RTL implementation is shown below.
 
 ## Write Logic
 
-The GPIO registers are updated synchronously on the rising clock edge.
+Register writes occur synchronously.
 
 ```verilog
 always @(posedge clk or posedge reset)
 ```
 
-During reset:
-
-```verilog
-gpio_data <= 32'b0;
-gpio_dir  <= 32'b0;
-```
-
-Register selection is performed using:
+Register decoding:
 
 ```verilog
 case(reg_sel)
@@ -388,16 +348,14 @@ default:
 endcase
 ```
 
-| reg_sel | Selected Register |
-|----------|-------------------|
+| reg_sel | Register |
+|---------|----------|
 | 00 | GPIO_DATA |
 | 01 | GPIO_DIR |
 
 ---
 
 ## Read Logic
-
-A combinational block returns the selected register value.
 
 ```verilog
 always @(*)
@@ -421,19 +379,13 @@ default:
 endcase
 ```
 
-| reg_sel | Read Register |
-|----------|---------------|
-| 00 | GPIO_DATA |
-| 01 | GPIO_DIR |
-| 10 | GPIO_READ |
-
-The default case avoids unintended latch generation.
+The default case prevents unintended latch generation.
 
 ---
 
-## GPIO Output Generation
+## GPIO Output
 
-GPIO outputs are driven directly from the data register.
+GPIO outputs always reflect the contents of `GPIO_DATA`.
 
 ```verilog
 always @(*)
@@ -441,8 +393,6 @@ begin
     gpio_out = gpio_data;
 end
 ```
-
-Thus, any value written to `GPIO_DATA` immediately appears on the GPIO outputs.
 
 ---
 
@@ -453,209 +403,163 @@ A register map was prepared for software access.
 ![Register Map](step2_4_register_map_txt.png)
 
 | Offset | Register | reg_sel |
-|----------|----------|---------|
+|---------|----------|---------|
 | 0x00 | GPIO_DATA | 00 |
 | 0x04 | GPIO_DIR | 01 |
 | 0x08 | GPIO_READ | 10 |
 
-The register decoder maps each address offset to its corresponding internal register.
+---
+
+# Testbench Update
+
+The testbench was modified to support the new register-selection logic.
+
+![Updated Testbench](step2_5a_edit_tb.png)
+
+![Updated Testbench](step2_5b_edit_tb.png)
+
+New signal:
+
+```verilog
+reg [1:0] reg_sel;
+```
+
+DUT connection:
+
+```verilog
+.reg_sel(reg_sel)
+```
+
+### Validation Flow
+
+1. Apply reset
+2. Select GPIO_DATA
+3. Write `0xA5`
+4. Read GPIO_DATA
+5. Compare read and written values
+6. Display PASS/FAIL
 
 ---
 
-# Step 2: Implement Multi-Register RTL
+# Compilation & Simulation
 
-## Objective
+```bash
+iverilog -o gpio_sim gpio_ip.v gpio_tb.v
+vvp gpio_sim
+```
 
-This step extends the original single-register GPIO IP into a multi-register GPIO peripheral supporting independent data, direction, and readback registers through address decoding.
+![Compilation and Simulation](step2_6_compilation_success_iverilog.png)
 
-Key features implemented:
+### Simulation Output
+
+```text
+GPIO WRITE VALUE = 000000A5
+GPIO READ VALUE  = 000000A5
+GPIO TEST PASSED
+```
+
+The matching values verify successful register write and readback operations.
+
+---
+
+# GTKWave Verification
+
+The waveform was viewed using:
+
+```bash
+gtkwave gpio.vcd
+```
+
+![GTKWave Launch](step2_7a_compile_simulation_gtk.png)
+
+Waveform:
+
+![GTKWave Verification](step2_7b_gtk_wave.png)
+
+Observed values:
+
+```text
+write_data = 000000A5
+gpio_out   = 000000A5
+read_data  = 000000A5
+```
+
+The waveform confirms correct register decoding, data transfer, and GPIO output generation.
+
+---
+
+# Submission Requirements
+
+## Updated GPIO IP RTL
+
+The original GPIO IP was successfully upgraded to support:
 
 - GPIO_DATA register
 - GPIO_DIR register
 - GPIO_READ register
 - Register selection logic
-- Synchronous write operation
-- Combinational read operation
+- Multi-register architecture
 
 ---
 
-## Backup of Original Design
+## Register Map Description
 
-Before modifying the RTL, a backup of the original GPIO IP was created.
-
-```bash
-cp gpio_ip.v gpio_ip_task4_backup.v
-```
-
-![GPIO Backup](step2_1_backup_gpio_creaated.png)
-
-This allows the original design to be restored if required.
+| Offset | Register | Description |
+|---------|----------|-------------|
+| 0x00 | GPIO_DATA | Stores GPIO output data |
+| 0x04 | GPIO_DIR | Stores GPIO direction |
+| 0x08 | GPIO_READ | Returns GPIO state |
 
 ---
 
-## Original GPIO RTL Review
+## Simulation Proof
 
-The original GPIO IP contained only one register:
+Simulation and GTKWave verification confirm:
 
-```verilog
-reg [31:0] gpio_reg;
-```
-
-It was responsible for:
-
-- GPIO data storage
-- Readback
-- GPIO output generation
-
-Since a single register handled all operations, separate direction control was not supported.
-
-![Original GPIO RTL](step2_2_original_gpio_ip.png)
+- Correct register updates
+- Correct readback behavior
+- Proper GPIO output generation
 
 ---
 
-# RTL Modifications
+## C Validation Code
 
-The GPIO architecture was updated to support multiple internal registers.
-
-## Register Interface
-
-A register selection signal was introduced.
-
-```verilog
-input [1:0] reg_sel;
-```
-
-`reg_sel` selects the internal register to be accessed.
+Software validation is performed in **Step-4**, where a C program verifies GPIO direction, data write, and readback operations.
 
 ---
 
-## Internal Registers
+## Short Explanation
 
-```verilog
-reg [31:0] gpio_data;
-reg [31:0] gpio_dir;
-```
+### Address Offset Decoding
 
-| Register | Function |
-|-----------|----------|
-| gpio_data | Stores GPIO output data |
-| gpio_dir | Stores GPIO direction |
+The GPIO IP uses a 2-bit `reg_sel` signal to select the required internal register.
 
----
+| Offset | reg_sel | Register |
+|---------|---------|----------|
+| 0x00 | 00 | GPIO_DATA |
+| 0x04 | 01 | GPIO_DIR |
+| 0x08 | 10 | GPIO_READ |
 
-## Multi-Register GPIO RTL
-
-The updated RTL implementation is shown below.
-
-![Multi Register GPIO RTL](step2_3a_multireg_gpio_rtl.png)
-
-![Multi Register GPIO RTL](step2_3b_multireg_gpio_rtl.png)
+This enables multiple registers to be accessed through a single memory-mapped GPIO peripheral.
 
 ---
 
-## Write Logic
+### Direction Behavior
 
-The GPIO registers are updated synchronously on the rising clock edge.
+`GPIO_DIR` determines whether a GPIO pin behaves as an input or output.
 
-```verilog
-always @(posedge clk or posedge reset)
-```
+| Value | Mode |
+|--------|------|
+| 1 | Output |
+| 0 | Input |
 
-During reset:
-
-```verilog
-gpio_data <= 32'b0;
-gpio_dir  <= 32'b0;
-```
-
-Register selection is performed using:
-
-```verilog
-case(reg_sel)
-
-2'b00:
-    gpio_data <= write_data;
-
-2'b01:
-    gpio_dir <= write_data;
-
-default:
-    ;
-
-endcase
-```
-
-| reg_sel | Selected Register |
-|----------|-------------------|
-| 00 | GPIO_DATA |
-| 01 | GPIO_DIR |
+When configured as an output, GPIO values stored in `GPIO_DATA` are driven to the output pins, while `GPIO_READ` returns the current GPIO state.
 
 ---
 
-## Read Logic
+# Outcome
 
-A combinational block returns the selected register value.
-
-```verilog
-always @(*)
-```
-
-```verilog
-case(reg_sel)
-
-2'b00:
-    read_data = gpio_data;
-
-2'b01:
-    read_data = gpio_dir;
-
-2'b10:
-    read_data = gpio_out;
-
-default:
-    read_data = 32'b0;
-
-endcase
-```
-
-| reg_sel | Read Register |
-|----------|---------------|
-| 00 | GPIO_DATA |
-| 01 | GPIO_DIR |
-| 10 | GPIO_READ |
-
-The default case avoids unintended latch generation.
-
----
-
-## GPIO Output Generation
-
-GPIO outputs are driven directly from the data register.
-
-```verilog
-always @(*)
-begin
-    gpio_out = gpio_data;
-end
-```
-
-Thus, any value written to `GPIO_DATA` immediately appears on the GPIO outputs.
-
----
-
-# Register Map
-
-A register map was prepared for software access.
-
-![Register Map](step2_4_register_map_txt.png)
-
-| Offset | Register | reg_sel |
-|----------|----------|---------|
-| 0x00 | GPIO_DATA | 00 |
-| 0x04 | GPIO_DIR | 01 |
-| 0x08 | GPIO_READ | 10 |
-
-The register decoder maps each address offset to its corresponding internal register.
+The GPIO IP was successfully extended into a clean multi-register architecture with proper register decoding, synchronous write logic, combinational read logic, successful simulation, and waveform verification. The implementation satisfies all mandatory Task-5 Step-2 requirements and is ready for SoC integration.
 
 ---
 
@@ -663,42 +567,44 @@ The register decoder maps each address offset to its corresponding internal regi
 
 ## Objective
 
-This step integrates the multi-register GPIO IP into the existing SoC while preserving the Task-2 memory-mapped interface. The integration ensures correct address decoding, GPIO output generation, and readback functionality.
+The multi-register GPIO IP was integrated into the existing SoC while preserving the Task-4 memory-mapped interface. The integration ensures correct address decoding, GPIO signal routing, and compatibility with the existing processor architecture.
 
 ---
 
-# Creating Backup Files
+# Backup of SoC Files
 
-Before modifying the SoC files, backup copies were created.
+Before modifying the SoC, backup copies of the required files were created.
 
 ```bash
+cd ~/vsdfpga_labs/basicRISCV/RTL
+
 cp gpio_output.v gpio_output_backup.v
 cp riscv.v riscv_backup_task3.v
+
+ls *backup*
 ```
 
 ![Backup Files](step3_1_backup_files.png)
 
-These backups allow the original design to be restored if required.
-
 ---
 
-# Reviewing the Existing GPIO Peripheral
+# Existing GPIO Peripheral
 
-The original GPIO peripheral used a single register:
+The original GPIO peripheral contained a single register.
 
 ```verilog
 reg [31:0] gpio_reg;
 ```
 
-It supported GPIO data storage, output generation, and readback but did not support multiple registers or direction control.
+It supported GPIO storage, output generation, and readback but did not support multiple registers or direction control.
 
 ![Original GPIO Peripheral](step3_2_old_gpio_output.png)
 
 ---
 
-# Updating GPIO Peripheral Architecture
+# Updating the GPIO Peripheral
 
-The GPIO peripheral was upgraded by introducing separate data and direction registers along with a register selection signal.
+The GPIO peripheral was extended to support multi-register operation by introducing separate data and direction registers.
 
 ```verilog
 reg [31:0] gpio_data;
@@ -707,76 +613,49 @@ reg [31:0] gpio_dir;
 input wire [1:0] reg_sel;
 ```
 
----
+Updated GPIO RTL:
 
-## Updated Multi-Register GPIO Peripheral
+![Updated GPIO Peripheral](step3_3a_multiregister_gpio_output.png)
 
-The updated GPIO implementation is shown below.
-
-![Multi Register GPIO Peripheral](step3_3a_multiregister_gpio_output.png)
-
-![Multi Register GPIO Peripheral](step3_3b_multi_register_gpio_output.png)
+![Updated GPIO Peripheral](step3_3b_multi_register_gpio_output.png)
 
 ---
 
 # Register Architecture
 
 | Offset | Register | Function |
-|----------|----------|----------|
+|---------|----------|----------|
 | 0x00 | GPIO_DATA | Stores GPIO output data |
 | 0x04 | GPIO_DIR | Stores GPIO direction |
-| 0x08 | GPIO_READ | Provides GPIO readback |
+| 0x08 | GPIO_READ | Returns GPIO state |
+
+Register selection is performed using the `reg_sel` signal.
 
 ---
 
-# Address Offset Decoding
+# SoC Integration
 
-The GPIO IP uses `reg_sel` to select the required register.
-
-```verilog
-case(reg_sel)
-
-2'b00:
-    gpio_data <= write_data;
-
-2'b01:
-    gpio_dir <= write_data;
-
-endcase
-```
-
-| reg_sel | Register |
-|----------|----------|
-| 00 | GPIO_DATA |
-| 01 | GPIO_DIR |
-| 10 | GPIO_READ |
-
-This enables software to access multiple GPIO registers using address-offset decoding.
-
----
-
-# SoC Integration Review
-
-The GPIO peripheral instance inside the SoC was verified.
+The GPIO instance inside the SoC was verified after integrating the updated peripheral.
 
 ![GPIO SoC Connection](step3_4_soc_gpio_connection.png)
 
-The integration confirms:
+The following connections remain unchanged:
 
-- Clock connection
-- Reset connection
-- Read/Write enable signals
-- Data bus interface
-- GPIO output path
-- GPIO readback path
+- Clock
+- Reset
+- Write Enable
+- Read Enable
+- Data Bus
+- GPIO Output
+- GPIO Readback
 
-The existing Task-2 architecture remains unchanged.
+This keeps the integration flow consistent with Task-4.
 
 ---
 
-# GPIO Address Decode Path
+# Address Decoding
 
-GPIO accesses are enabled using:
+The GPIO peripheral continues to use the existing memory-mapped interface.
 
 ```verilog
 IO_GPIO_bit = 3;
@@ -788,17 +667,17 @@ mem_wordaddr[IO_GPIO_bit]
 
 ![GPIO Address Decode](step3_5_address_deccode.png)
 
-When `mem_wordaddr[IO_GPIO_bit]` is asserted, the SoC routes read and write transactions to the GPIO peripheral through the existing memory-mapped interface.
+When the GPIO address is selected, read and write requests are routed to the appropriate GPIO register through `reg_sel`.
 
 ---
 
 # GPIO Readback Path
 
-The GPIO readback path was verified.
+The GPIO readback connection was verified.
 
 ![GPIO Readback Path](step3_6_gpio_readback_path.png)
 
-The readback flow is:
+Readback path:
 
 ```text
 GPIO Register
@@ -812,35 +691,26 @@ GPIO Register
      CPU
 ```
 
-This ensures that GPIO register values are correctly returned to the processor.
+This confirms that data stored inside the GPIO peripheral is correctly returned to the processor.
 
 ---
 
 # Integration Verification
 
-The following features were successfully verified:
+The following requirements were successfully verified:
 
-- Multi-register GPIO integration
-- Existing address decoding preserved
-- GPIO output path maintained
-- GPIO readback path verified
-- Memory-mapped interface preserved
-- SoC compatibility maintained
+- ✅ Updated GPIO peripheral integrated
+- ✅ Existing address decoding preserved
+- ✅ GPIO signals exposed through the top module
+- ✅ Readback path verified
+- ✅ Memory-mapped interface maintained
+- ✅ Integration flow remains consistent with Task-4
 
 ---
 
 # Outcome
 
-The multi-register GPIO IP was successfully integrated into the SoC with support for:
-
-- GPIO_DATA register
-- GPIO_DIR register
-- GPIO_READ register
-- Register selection logic
-- Address decoding
-- GPIO readback
-
-The design is now ready for software validation and simulation.
+The multi-register GPIO IP was successfully integrated into the SoC while preserving the existing architecture. Address decoding, GPIO routing, and readback functionality operate correctly, preparing the design for software validation in the next step.
 
 ---
 
@@ -848,99 +718,63 @@ The design is now ready for software validation and simulation.
 
 ## Objective
 
-This step validates the multi-register GPIO IP through simulation and software testing by verifying GPIO direction, data write/read operations, and end-to-end software-to-hardware functionality.
+The multi-register GPIO IP was validated using simulation and a C validation program. The validation verified GPIO direction control, GPIO data write/read operations, and correct software-to-hardware functionality.
 
-Simulation was performed using **Icarus Verilog** and **GTKWave**.
+Simulation was performed using **Icarus Verilog**, while waveform verification was completed using **GTKWave**.
 
 ---
 
 # Updating the Testbench
 
-The testbench was updated to validate all implemented GPIO registers.
+The GPIO testbench was updated to validate all implemented registers.
 
 ![Updated Testbench](step4_1a_updated_tb.png)
 
 ![Updated Testbench](step4_1b_updated_tb.png)
 
----
+The updated testbench performs the following sequence:
 
-## Testbench Validation Sequence
-
-### 1. Apply Reset
-
-```verilog
-reset = 1;
-```
-
-Initializes all GPIO registers.
+1. Apply reset
+2. Configure `GPIO_DIR`
+3. Write data to `GPIO_DATA`
+4. Read data through `GPIO_READ`
+5. Compare the received value with the expected value
+6. Display PASS/FAIL status
 
 ---
 
-### 2. Configure GPIO Direction
+# Testbench Validation
+
+The following register values are exercised during simulation.
+
+### Configure GPIO Direction
 
 ```verilog
 reg_sel = 2'b01;
-write_en = 1;
 write_data = 32'h000000FF;
 ```
 
-| Register | Value |
-|-----------|-------|
-| GPIO_DIR | 0xFF |
-
-Configures the lower 8 GPIO pins as outputs.
-
----
-
-### 3. Write GPIO Data
+### Write GPIO Data
 
 ```verilog
 reg_sel = 2'b00;
 write_data = 32'h000000A5;
 ```
 
-| Register | Value |
-|-----------|-------|
-| GPIO_DATA | 0xA5 |
-
----
-
-### 4. Read GPIO State
+### Read GPIO State
 
 ```verilog
 reg_sel = 2'b10;
 read_en = 1;
 ```
 
-| Register |
-|-----------|
-| GPIO_READ |
-
-The readback path returns the current GPIO state.
-
----
-
-# Register Validation
-
-The testbench displays:
-
-```verilog
-$display("GPIO_DIR  = 000000FF");
-$display("GPIO_DATA = 000000A5");
-$display("GPIO_READ = %h", read_data);
-```
-
-Validation is performed using:
-
-```verilog
-if(read_data == 32'h000000A5)
-```
-
-The test reports **GPIO VALIDATION PASSED** when the read value matches the written value.
+The testbench verifies that the value read through `GPIO_READ` matches the value written into `GPIO_DATA`.
 
 ---
 
 # Compilation & Simulation
+
+The updated design was compiled using Icarus Verilog.
 
 ```bash
 iverilog -o gpio_sim gpio_output.v gpio_tb.v
@@ -949,9 +783,7 @@ vvp gpio_sim
 
 ![Simulation and Compilation](step4_2_simulation_and_compilation.png)
 
----
-
-# Simulation Results
+### Simulation Output
 
 ```text
 GPIO_DIR  = 000000FF
@@ -961,16 +793,18 @@ GPIO_READ = 000000A5
 GPIO VALIDATION PASSED
 ```
 
-The matching values verify:
+The simulation confirms:
 
-- Correct direction configuration
-- Successful data write
+- Correct GPIO direction configuration
+- Successful data write operation
 - Accurate GPIO readback
-- Proper register selection
+- Proper register functionality
 
 ---
 
 # GTKWave Verification
+
+The generated waveform was opened using:
 
 ```bash
 gtkwave gpio.vcd
@@ -978,16 +812,14 @@ gtkwave gpio.vcd
 
 ![GTKWave Launch](step4_3a_gtk.png)
 
----
-
-## Waveform Analysis
+Waveform:
 
 ![GTKWave Waveform](step4_3b_gtk_wave.png)
 
 ### Observed Signals
 
 | Signal | Value |
-|----------|-------|
+|---------|-------|
 | GPIO_DIR | 000000FF |
 | GPIO_DATA | 000000A5 |
 | GPIO_READ | 000000A5 |
@@ -995,43 +827,33 @@ gtkwave gpio.vcd
 
 The waveform confirms:
 
-- Reset operation
-- GPIO_DIR update
-- GPIO_DATA update
-- GPIO_READ operation
-- GPIO output generation
-- Correct register selection sequence
-
-```text
-01 → GPIO_DIR
-00 → GPIO_DATA
-10 → GPIO_READ
-```
+- Successful reset
+- GPIO direction update
+- GPIO data update
+- Correct register selection
+- Accurate GPIO readback
 
 ---
 
 # Software Validation Program
 
-A C program was created to emulate software access to the GPIO peripheral.
+A C program was written to emulate software access to the GPIO peripheral.
 
 ![GPIO Validation C Program](step4_4_gpio_validation_c_code.png)
 
-### Software Flow
+The program performs the following operations:
 
-```c
-#define GPIO_DIR_VALUE 0xFF
-#define GPIO_DATA_VALUE 0xA5
-
-gpio_read = GPIO_DATA_VALUE;
-
-if(gpio_read == GPIO_DATA_VALUE)
-```
-
-The program configures GPIO direction, writes data, reads it back, and verifies the result.
+- Configure GPIO direction
+- Write data to GPIO_DATA
+- Read GPIO_READ
+- Compare written and received values
+- Print the validation result
 
 ---
 
 # Software Compilation
+
+The validation program was compiled using GCC.
 
 ```bash
 gcc gpio_validation.c -o gpio_validation
@@ -1044,6 +866,8 @@ Compilation completed successfully.
 ---
 
 # UART / Software Output
+
+The validation program was executed.
 
 ```bash
 ./gpio_validation
@@ -1063,24 +887,79 @@ GPIO_READ = 0xA5
 GPIO VALIDATION PASSED
 ```
 
+The software output matches the simulation results, confirming successful software-to-hardware validation.
+
+---
+
+# Submission Requirements
+
+## C Validation Program
+
+The C program successfully demonstrates:
+
+- GPIO direction configuration
+- GPIO data write
+- GPIO readback
+- Validation of received data
+
+---
+
+## Simulation Proof
+
+Simulation and GTKWave verification confirm:
+
+- Direction control works correctly
+- GPIO output updates are reflected
+- Readback behaves as expected
+
+---
+
+## Short Explanation
+
+### How Address Offsets Are Decoded
+
+The GPIO peripheral uses the `reg_sel` signal to select one of the internal registers.
+
+| Offset | reg_sel | Register |
+|---------|---------|----------|
+| 0x00 | 00 | GPIO_DATA |
+| 0x04 | 01 | GPIO_DIR |
+| 0x08 | 10 | GPIO_READ |
+
+This enables software to access multiple GPIO registers through a single memory-mapped peripheral.
+
+---
+
+### How Direction Affects Behavior
+
+The `GPIO_DIR` register controls the direction of each GPIO pin.
+
+| Value | Mode |
+|--------|------|
+| 1 | Output |
+| 0 | Input |
+
+During validation:
+
+- `GPIO_DIR = 0xFF` configures the lower 8 GPIO pins as outputs.
+- `GPIO_DATA = 0xA5` drives the GPIO outputs.
+- `GPIO_READ` returns the same value, confirming correct readback behavior.
+
 ---
 
 # Outcome
 
-Software validation successfully verified:
+The software validation successfully verified:
 
-- GPIO direction control
-- GPIO data write/read operations
-- Register decoding
-- GPIO output generation
-- Simulation correctness
-- GTKWave verification
-- Software-level validation
+- ✅ GPIO direction control
+- ✅ GPIO data write operation
+- ✅ GPIO readback functionality
+- ✅ Correct register decoding
+- ✅ Successful simulation
+- ✅ GTKWave waveform verification
+- ✅ Software-level validation
 
-The multi-register GPIO IP behaved as expected and satisfied all Step-4 validation requirements.
-
----
-
+The multi-register GPIO peripheral satisfies all mandatory Step-4 requirements and is ready for hardware implementation.
 
 ---
 
