@@ -65,7 +65,7 @@ gedit sum1ton.c
 
 ## Screenshot
 
-![Editing Source Code](gedit_sum1ton.png)
+![Editing Source Code](Images/gedit_sum1ton.png)
 
 The program uses a `for` loop to iterate from 1 to `n` and continuously accumulate the sum. The final result is displayed using the `printf()` function.
 
@@ -89,7 +89,7 @@ gcc sum1ton.c
 
 ## Screenshot
 
-![GCC Compilation and Execution](gcc_soln.png)
+![GCC Compilation and Execution](Images/gcc_soln.png)
 
 ## Output
 
@@ -121,7 +121,7 @@ spike pk sum1ton.o
 
 ## Screenshot
 
-![Spike Simulation](spike_sim.png)
+![Spike Simulation](Images/spike_sim.png)
 
 ## Output
 
@@ -153,7 +153,7 @@ cat sum1ton.c
 
 ## Screenshot
 
-![O1 Source Code Verification](assembly_o1_code.png)
+![O1 Source Code Verification](Images/assembly_o1_code.png)
 
 ## Compilation Command
 
@@ -181,7 +181,7 @@ riscv64-unknown-elf-objdump -d sum1ton.o
 
 ## Screenshot
 
-![O1 Disassembly](assembly_O1_soln.png)
+![O1 Disassembly](Images/assembly_O1_soln.png)
 
 ## Analysis
 
@@ -215,7 +215,7 @@ ls -ltr sum1ton.o
 
 ## Screenshot
 
-![Ofast Compilation](ofast_code.png)
+![Ofast Compilation](Images/ofast_code.png)
 
 ---
 
@@ -229,7 +229,7 @@ riscv64-unknown-elf-objdump -d sum1ton.o
 
 ## Screenshot
 
-![Ofast Disassembly](ofast_asembly.png)
+![Ofast Disassembly](Images/ofast_asembly.png)
 
 ## Analysis
 
