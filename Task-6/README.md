@@ -295,3 +295,211 @@ Verified operations:
 This confirms that the PWM peripheral RTL works correctly before SoC integration and FPGA implementation.
 
 ---
+
+---
+
+# Step 5: PWM IP Integration with RISC-V SoC
+
+After verifying the standalone PWM module, the next step was integrating the PWM peripheral into the existing RISC-V SoC.
+
+The integration process included:
+
+- Adding PWM address space
+- Connecting PWM with CPU memory bus
+- Creating read/write paths
+- Exposing PWM output signal
+
+
+## Adding PWM Address Decode
+
+A new IO address bit was assigned for the PWM peripheral inside the RISC-V SoC memory map.
+
+The PWM IP was added as a separate memory-mapped peripheral similar to GPIO and UART.
+
+```verilog
+localparam IO_PWM_bit = 4;
+```
+
+This allows the processor to identify PWM register accesses using address decoding logic.
+
+
+![PWM Address Mapping](add_pwm_address_riscv.png)
+
+
+---
+
+## Verifying PWM Connections
+
+After modification, the updated RISC-V SoC file was checked to confirm that the PWM signals were correctly added.
+
+The following signals were verified:
+
+- pwm_read
+- pwm_out
+- PWM address selection
+
+
+Commands used:
+
+```bash
+grep -n "IO_PWM" riscv.v
+
+grep -n "pwm_read" riscv.v
+```
+
+
+The output confirms successful addition of PWM related signals inside the SoC design.
+
+
+![PWM Verification](changes_riscv_verification.png)
+
+
+---
+
+## PWM Bus Interface Connection
+
+The PWM IP was connected with the existing processor communication interface.
+
+Additional wires were introduced:
+
+```verilog
+wire [31:0] pwm_read;
+wire pwm_out;
+```
+
+
+These signals allow:
+
+- CPU write access to PWM registers
+- CPU readback from PWM peripheral
+- PWM output connection to external hardware
+
+
+![PWM Wires Integration](pwm_wires_riscv.png)
+
+
+---
+
+# Step 6: Software Validation Setup
+
+To validate hardware control through software, firmware support was added.
+
+The RISC-V firmware directory was used for writing software tests which configure the PWM registers.
+
+Software validation verifies:
+
+- Register configuration from C program
+- Period value update
+- Duty cycle modification
+- PWM enable control
+
+
+Firmware files were checked inside the project directory:
+
+
+![Firmware Directory](firmware_folder.png)
+
+
+The software layer completes the connection between:
+
+```
+C Program
+    ↓
+RISC-V CPU
+    ↓
+Memory Bus
+    ↓
+PWM Hardware IP
+    ↓
+PWM Output Signal
+```
+
+
+---
+
+## Integration Result
+
+Successfully completed:
+
+✔ PWM address mapping  
+✔ SoC level signal connection  
+✔ CPU to PWM communication path  
+✔ Firmware validation environment setup  
+
+The PWM IP is now integrated as a complete RISC-V controlled hardware peripheral.
+
+---
+
+---
+
+# Step 7: PWM IP Documentation
+
+After completing RTL design, simulation, and SoC integration, a dedicated documentation file was created for the PWM peripheral.
+
+The README documentation describes:
+
+- Purpose of PWM IP
+- Register map
+- Register access type
+- Control bits
+- Functional behavior
+
+
+## PWM Register Description
+
+The PWM peripheral follows a 32-bit memory mapped register structure.
+
+| Offset | Register | Access | Function |
+|---|---|---|---|
+| 0x00 | CTRL | R/W | PWM enable and polarity control |
+| 0x04 | PERIOD | R/W | Sets PWM period count |
+| 0x08 | DUTY | R/W | Sets PWM high time |
+| 0x0C | STATUS | R | Shows running status |
+
+
+## Control Register
+
+The CTRL register controls the operation of PWM:
+
+- Bit 0 : EN  
+  Enables or disables PWM generation
+
+- Bit 1 : POL  
+  Selects PWM output polarity
+
+
+## Period and Duty Configuration
+
+The PERIOD register decides the complete PWM cycle duration.
+
+The DUTY register decides the amount of time for which PWM output remains HIGH during one period.
+
+Changing the duty value changes the effective duty cycle of the PWM waveform.
+
+
+## Status Register
+
+The STATUS register provides:
+
+- PWM running state
+- Current counter value for debugging
+
+
+![PWM Documentation](readme_register_map.png)
+
+
+---
+
+## Documentation Result
+
+The PWM IP documentation provides a clear hardware-software interface, making the peripheral easier to integrate, test, and modify.
+
+Completed:
+
+✔ Register map documentation  
+✔ Control bit explanation  
+✔ Software interface details  
+✔ Peripheral usage description  
+
+---
+
