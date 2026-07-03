@@ -84,6 +84,75 @@ By modifying the duty value, the ON time of the signal changes, which controls t
 
 ---
 
+---
+
+# PWM IP Directory Structure Creation
+
+Before starting the PWM peripheral development, a separate IP directory structure was created inside the existing RISC-V SoC project.
+
+This follows a modular hardware development approach where RTL design files, test files, firmware code, and documentation are maintained separately.
+
+The PWM IP directory contains:
+
+- `rtl` : Contains Verilog RTL implementation of PWM IP
+- `test` : Contains simulation testbench files
+- `firmware` : Contains software validation programs
+- `README.md` : Contains IP documentation
+
+
+## Creating PWM IP Folders
+
+The following directory structure was created:
+
+```bash
+mkdir -p ip/pwm/rtl
+mkdir -p ip/pwm/test
+mkdir -p ip/pwm/firmware
+```
+
+Existing PWM design files were organized into their respective folders:
+
+- pwm_ip.v → rtl folder
+- pwm_tb.v → test folder
+- pwm_test.c → firmware folder
+
+
+![PWM Folder Creation](creating_folder_structure.png)
+
+
+---
+
+## Final PWM IP Structure
+
+The complete PWM IP folder structure was verified using:
+
+```bash
+tree ip
+```
+
+Final structure:
+
+```text
+ip
+└── pwm
+    ├── firmware
+    │   └── pwm_test.c
+    ├── README.md
+    ├── rtl
+    │   └── pwm_ip.v
+    └── test
+        └── pwm_tb.v
+```
+
+This structure keeps the IP reusable and easy to integrate with different SoC designs.
+
+
+![PWM Final Structure](final_structure.png)
+
+
+---
+
+
 # Step 1: Creating PWM Peripheral Files
 
 The first step was to create separate Verilog files for PWM IP design and verification inside the existing RISC-V SoC RTL directory.
@@ -500,6 +569,161 @@ Completed:
 ✔ Control bit explanation  
 ✔ Software interface details  
 ✔ Peripheral usage description  
+
+---
+
+---
+
+# Step 8: PWM Software Validation
+
+After completing hardware integration, software validation was performed using a C program running on the RISC-V processor.
+
+The software test configures the PWM registers and verifies correct peripheral operation through processor control.
+
+The validation program performs:
+
+- CTRL register configuration
+- PERIOD value programming
+- DUTY cycle update
+- PWM enable operation
+
+
+## PWM Validation Program
+
+The C program defines PWM configuration values:
+
+- CTRL = Enable PWM
+- PERIOD = 100 clock cycles
+- DUTY = 40 clock cycles
+
+This configuration generates approximately 40% duty cycle PWM output.
+
+
+```c
+#define PWM_CTRL_VALUE    0x01
+#define PWM_PERIOD_VALUE  100
+#define PWM_DUTY_VALUE    40
+```
+
+The software verifies that duty cycle configuration is valid before enabling PWM operation.
+
+
+![PWM Validation Code](pwm_validation_code.png)
+
+
+---
+
+## Firmware Compilation
+
+The PWM validation program was compiled using the RISC-V GCC toolchain.
+
+The compilation flow generates:
+
+- ELF executable file
+- BRAM HEX file
+- Firmware image for SoC loading
+
+
+Command used:
+
+```bash
+make pwm_validation.bram.hex
+```
+
+
+The generated firmware image is copied into the RTL directory for SoC execution.
+
+
+![PWM Firmware Build](pwm_validation_build.png)
+
+
+---
+
+# Step 9: FPGA Build and Synthesis
+
+After successful RTL integration and firmware generation, the complete SoC design was synthesized.
+
+The build process includes:
+
+- RTL synthesis
+- Technology mapping
+- Place and route
+- Timing analysis
+- Bitstream generation
+
+
+Command executed:
+
+```bash
+make clean
+
+make
+```
+
+
+The toolchain successfully generated FPGA output files:
+
+- SOC.json
+- SOC.asc
+- SOC.bin
+
+
+![SoC Build](make_command_riscv.png)
+
+
+---
+
+## Timing and Resource Report
+
+The FPGA implementation completed successfully with no errors.
+
+Build verification:
+
+- Timing analysis completed
+- Device resources mapped successfully
+- Bitstream generated for VSDSquadron FPGA board
+
+
+Important result:
+
+```
+1 warning, 0 errors
+
+Info: Program finished normally.
+```
+
+
+This confirms successful hardware implementation of the PWM integrated RISC-V SoC.
+
+
+![Build Success](soc_build_success.png)
+
+
+---
+
+# Final Results
+
+The complete PWM peripheral development flow was successfully completed.
+
+Implemented and verified:
+
+✔ PWM RTL Design  
+✔ Register based peripheral interface  
+✔ RISC-V SoC Integration  
+✔ Software controlled PWM configuration  
+✔ Functional simulation using GTKWave  
+✔ FPGA synthesis and bitstream generation  
+
+
+---
+
+# We can report that , 
+
+This demonstrates the complete development cycle of a custom hardware peripheral IP similar to an industry-level FPGA and semiconductor workflow.
+
+A configurable PWM IP was designed using Verilog, integrated into a RISC-V based SoC, controlled through software, verified using simulation, and finally synthesized for FPGA hardware implementation.
+
+The project provided practical understanding of hardware-software interaction, memory mapped peripherals, SoC integration, and FPGA based validation.
 
 ---
 
