@@ -150,7 +150,7 @@ Since all operations relied on a single register, separate direction control and
 
 The existing RTL files were reviewed before modifying the design.
 
-![GPIO File Review](step1_1_verilog_files.png)
+![GPIO File Review](Images/step1_1_verilog_files.png)
 
 The reviewed files include:
 
@@ -167,7 +167,7 @@ These files were used throughout the implementation and verification process.
 
 The GPIO RTL was analyzed to understand its register storage, write/read operations, and output generation.
 
-![GPIO RTL Review](step1_2_gpio_ip_review.png)
+![GPIO RTL Review](Images/step1_2_gpio_ip_review.png)
 
 The review confirmed that all GPIO functionality was implemented using a single `gpio_reg`.
 
@@ -177,7 +177,7 @@ The review confirmed that all GPIO functionality was implemented using a single 
 
 A recursive GPIO search was performed to identify all GPIO-related connections.
 
-![GPIO Reference Search](step1_3_reference_search_gpio.png)
+![GPIO Reference Search](Images/step1_3_reference_search_gpio.png)
 
 The search identified:
 
@@ -194,7 +194,7 @@ This helped determine the required RTL modifications.
 
 A planning document was prepared before implementing the new architecture.
 
-![Planning Document](step1_4_gpio_planning_txt.png)
+![Planning Document](Images/step1_4_gpio_planning_txt.png)
 
 ### Planned Registers
 
@@ -282,7 +282,7 @@ cd ~/vsdfpga_labs/basicRISCV/RTL
 cp gpio_ip.v gpio_ip_task4_backup.v
 ```
 
-![GPIO Backup](step2_1_backup_gpio_creaated.png)
+![GPIO Backup](Images/step2_1_backup_gpio_creaated.png)
 
 ---
 
@@ -296,7 +296,7 @@ reg [31:0] gpio_reg;
 
 This register handled GPIO output storage, readback, and output generation, making the design unsuitable for multiple register access.
 
-![Original GPIO RTL](step2_2_original_gpio_ip.png)
+![Original GPIO RTL](Images/step2_2_original_gpio_ip.png)
 
 ---
 
@@ -317,9 +317,9 @@ reg [31:0] gpio_dir;
 
 Updated RTL:
 
-![Multi Register GPIO RTL](step2_3a_multireg_gpio_rtl.png)
+![Multi Register GPIO RTL](Images/step2_3a_multireg_gpio_rtl.png)
 
-![Multi Register GPIO RTL](step2_3b_multireg_gpio_rtl.png)
+![Multi Register GPIO RTL](Images/step2_3b_multireg_gpio_rtl.png)
 
 ---
 
@@ -400,7 +400,7 @@ end
 
 A register map was prepared for software access.
 
-![Register Map](step2_4_register_map_txt.png)
+![Register Map](Images/step2_4_register_map_txt.png)
 
 | Offset | Register | reg_sel |
 |---------|----------|---------|
@@ -414,9 +414,9 @@ A register map was prepared for software access.
 
 The testbench was modified to support the new register-selection logic.
 
-![Updated Testbench](step2_5a_edit_tb.png)
+![Updated Testbench](Images/step2_5a_edit_tb.png)
 
-![Updated Testbench](step2_5b_edit_tb.png)
+![Updated Testbench](Images/step2_5b_edit_tb.png)
 
 New signal:
 
@@ -448,7 +448,7 @@ iverilog -o gpio_sim gpio_ip.v gpio_tb.v
 vvp gpio_sim
 ```
 
-![Compilation and Simulation](step2_6_compilation_success_iverilog.png)
+![Compilation and Simulation](Images/step2_6_compilation_success_iverilog.png)
 
 ### Simulation Output
 
@@ -470,11 +470,11 @@ The waveform was viewed using:
 gtkwave gpio.vcd
 ```
 
-![GTKWave Launch](step2_7a_compile_simulation_gtk.png)
+![GTKWave Launch](Images/step2_7a_compile_simulation_gtk.png)
 
 Waveform:
 
-![GTKWave Verification](step2_7b_gtk_wave.png)
+![GTKWave Verification](Images/step2_7b_gtk_wave.png)
 
 Observed values:
 
@@ -584,7 +584,7 @@ cp riscv.v riscv_backup_task3.v
 ls *backup*
 ```
 
-![Backup Files](step3_1_backup_files.png)
+![Backup Files](Images/step3_1_backup_files.png)
 
 ---
 
@@ -598,7 +598,7 @@ reg [31:0] gpio_reg;
 
 It supported GPIO storage, output generation, and readback but did not support multiple registers or direction control.
 
-![Original GPIO Peripheral](step3_2_old_gpio_output.png)
+![Original GPIO Peripheral](Images/step3_2_old_gpio_output.png)
 
 ---
 
@@ -615,9 +615,9 @@ input wire [1:0] reg_sel;
 
 Updated GPIO RTL:
 
-![Updated GPIO Peripheral](step3_3a_multiregister_gpio_output.png)
+![Updated GPIO Peripheral](Images/step3_3a_multiregister_gpio_output.png)
 
-![Updated GPIO Peripheral](step3_3b_multi_register_gpio_output.png)
+![Updated GPIO Peripheral](Images/step3_3b_multi_register_gpio_output.png)
 
 ---
 
@@ -637,7 +637,7 @@ Register selection is performed using the `reg_sel` signal.
 
 The GPIO instance inside the SoC was verified after integrating the updated peripheral.
 
-![GPIO SoC Connection](step3_4_soc_gpio_connection.png)
+![GPIO SoC Connection](Images/step3_4_soc_gpio_connection.png)
 
 The following connections remain unchanged:
 
@@ -665,7 +665,7 @@ IO_GPIO_bit = 3;
 mem_wordaddr[IO_GPIO_bit]
 ```
 
-![GPIO Address Decode](step3_5_address_deccode.png)
+![GPIO Address Decode](Images/step3_5_address_deccode.png)
 
 When the GPIO address is selected, read and write requests are routed to the appropriate GPIO register through `reg_sel`.
 
@@ -675,7 +675,7 @@ When the GPIO address is selected, read and write requests are routed to the app
 
 The GPIO readback connection was verified.
 
-![GPIO Readback Path](step3_6_gpio_readback_path.png)
+![GPIO Readback Path](Images/step3_6_gpio_readback_path.png)
 
 Readback path:
 
@@ -728,9 +728,9 @@ Simulation was performed using **Icarus Verilog**, while waveform verification w
 
 The GPIO testbench was updated to validate all implemented registers.
 
-![Updated Testbench](step4_1a_updated_tb.png)
+![Updated Testbench](Images/step4_1a_updated_tb.png)
 
-![Updated Testbench](step4_1b_updated_tb.png)
+![Updated Testbench](Images/step4_1b_updated_tb.png)
 
 The updated testbench performs the following sequence:
 
@@ -781,7 +781,7 @@ iverilog -o gpio_sim gpio_output.v gpio_tb.v
 vvp gpio_sim
 ```
 
-![Simulation and Compilation](step4_2_simulation_and_compilation.png)
+![Simulation and Compilation](Images/step4_2_simulation_and_compilation.png)
 
 ### Simulation Output
 
@@ -810,11 +810,11 @@ The generated waveform was opened using:
 gtkwave gpio.vcd
 ```
 
-![GTKWave Launch](step4_3a_gtk.png)
+![GTKWave Launch](Images/step4_3a_gtk.png)
 
 Waveform:
 
-![GTKWave Waveform](step4_3b_gtk_wave.png)
+![GTKWave Waveform](Images/step4_3b_gtk_wave.png)
 
 ### Observed Signals
 
@@ -839,7 +839,7 @@ The waveform confirms:
 
 A C program was written to emulate software access to the GPIO peripheral.
 
-![GPIO Validation C Program](step4_4_gpio_validation_c_code.png)
+![GPIO Validation C Program](Images/step4_4_gpio_validation_c_code.png)
 
 The program performs the following operations:
 
@@ -859,7 +859,7 @@ The validation program was compiled using GCC.
 gcc gpio_validation.c -o gpio_validation
 ```
 
-![Software Compilation](step4_5_compilation.png)
+![Software Compilation](Images/step4_5_compilation.png)
 
 Compilation completed successfully.
 
@@ -873,7 +873,7 @@ The validation program was executed.
 ./gpio_validation
 ```
 
-![UART Output](step4_6_uart_output.png)
+![UART Output](Images/step4_6_uart_output.png)
 
 ### Program Output
 
