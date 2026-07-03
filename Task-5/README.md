@@ -1,4 +1,4 @@
-# Task-5: Design a Multi-Register GPIO IP with Software Control
+ Task-5: Design a Multi-Register GPIO IP with Software Control
 
 ## Objective
 
