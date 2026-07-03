@@ -117,7 +117,7 @@ Existing PWM design files were organized into their respective folders:
 - pwm_test.c → firmware folder
 
 
-![PWM Folder Creation](creating_folder_structure.png)
+![PWM Folder Creation](Images/creating_folder_structure.png)
 
 
 ---
@@ -147,7 +147,7 @@ ip
 This structure keeps the IP reusable and easy to integrate with different SoC designs.
 
 
-![PWM Final Structure](final_structure.png)
+![PWM Final Structure](Images/final_structure.png)
 
 
 ---
@@ -165,7 +165,7 @@ The PWM design files created were:
 The files were created using Linux terminal commands and edited using nano editor.
 
 
-![PWM Files Created](pwm_files_created.png)
+![PWM Files Created](Images/pwm_files_created.png)
 
 
 ---
@@ -193,7 +193,7 @@ The PWM IP contains four internal registers:
 - **COUNTER Register** : Generates timing reference for PWM waveform
 
 
-![PWM RTL Header](pwm_rtl_header.png)
+![PWM RTL Header](Images/pwm_rtl_header.png)
 
 
 ---
@@ -210,7 +210,7 @@ The counter:
 - Stops counting when PWM is disabled
 
 
-![PWM Counter Logic](pwm_rtl_counter_logic.png)
+![PWM Counter Logic](Images/pwm_rtl_counter_logic.png)
 
 ---
 
@@ -225,7 +225,7 @@ When polarity control is enabled, the PWM output waveform is inverted.
 This allows generation of both active-high and active-low PWM signals.
 
 
-![PWM Output Logic](pwm_rtl_output_logic.png)
+![PWM Output Logic](Images/pwm_rtl_output_logic.png)
 
 
 ---
@@ -246,7 +246,7 @@ Register selection:
 The status register provides information about PWM running condition and counter value.
 
 
-![PWM Read Logic](pwm_rtl_read_logic.png)
+![PWM Read Logic](Images/pwm_rtl_read_logic.png)
 
 
 ---
@@ -264,9 +264,9 @@ The testbench includes:
 - Waveform dump generation
 
 
-![PWM Testbench Part 1](pwm_tb_1.png)
+![PWM Testbench Part 1](Images/pwm_tb_1.png)
 
-![PWM Testbench Part 2](pwm_tb_2.png)
+![PWM Testbench Part 2](Images/pwm_tb_2.png)
 
 
 ---
@@ -306,7 +306,7 @@ gtkwave pwm.vcd
 The simulation successfully generated the VCD waveform dump file without compilation errors.
 
 
-![PWM Simulation](compilation_simulation_pwm.png)
+![PWM Simulation](Images/compilation_simulation_pwm.png)
 
 
 ---
@@ -345,7 +345,7 @@ Test configuration:
 The waveform confirms correct PWM generation based on the programmed register values.
 
 
-![PWM GTKWave Output](gtkwave_pwm_2.png)
+![PWM GTKWave Output](Images/gtkwave_pwm_2.png)
 
 
 ---
@@ -392,7 +392,7 @@ localparam IO_PWM_bit = 4;
 This allows the processor to identify PWM register accesses using address decoding logic.
 
 
-![PWM Address Mapping](add_pwm_address_riscv.png)
+![PWM Address Mapping](Images/add_pwm_address_riscv.png)
 
 
 ---
@@ -420,7 +420,7 @@ grep -n "pwm_read" riscv.v
 The output confirms successful addition of PWM related signals inside the SoC design.
 
 
-![PWM Verification](changes_riscv_verification.png)
+![PWM Verification](Images/changes_riscv_verification.png)
 
 
 ---
@@ -444,7 +444,7 @@ These signals allow:
 - PWM output connection to external hardware
 
 
-![PWM Wires Integration](pwm_wires_riscv.png)
+![PWM Wires Integration](Images/pwm_wires_riscv.png)
 
 
 ---
@@ -466,7 +466,7 @@ Software validation verifies:
 Firmware files were checked inside the project directory:
 
 
-![Firmware Directory](firmware_folder.png)
+![Firmware Directory](Images/firmware_folder.png)
 
 
 The software layer completes the connection between:
@@ -554,7 +554,7 @@ The STATUS register provides:
 - Current counter value for debugging
 
 
-![PWM Documentation](readme_register_map.png)
+![PWM Documentation](Images/readme_register_map.png)
 
 
 ---
@@ -608,7 +608,7 @@ This configuration generates approximately 40% duty cycle PWM output.
 The software verifies that duty cycle configuration is valid before enabling PWM operation.
 
 
-![PWM Validation Code](pwm_validation_code.png)
+![PWM Validation Code](Images/pwm_validation_code.png)
 
 
 ---
@@ -634,7 +634,7 @@ make pwm_validation.bram.hex
 The generated firmware image is copied into the RTL directory for SoC execution.
 
 
-![PWM Firmware Build](pwm_validation_build.png)
+![PWM Firmware Build](Images/pwm_validation_build.png)
 
 
 ---
@@ -668,7 +668,7 @@ The toolchain successfully generated FPGA output files:
 - SOC.bin
 
 
-![SoC Build](make_command_riscv.png)
+![SoC Build](Images/make_command_riscv.png)
 
 
 ---
@@ -696,7 +696,7 @@ Info: Program finished normally.
 This confirms successful hardware implementation of the PWM integrated RISC-V SoC.
 
 
-![Build Success](soc_build_success.png)
+![Build Success](Images/soc_build_success.png)
 
 
 ---
@@ -749,7 +749,7 @@ lsusb
 The board was successfully detected through the USB interface.
 
 
-![FPGA Board Detection](hardware_1.png)
+![FPGA Board Detection](Images/hardware_1.png)
 
 
 ---
@@ -771,7 +771,7 @@ The FPGA programming completed successfully:
 - PWM hardware design activated
 
 
-![FPGA Flash](hardware_flash.png)
+![FPGA Flash](Images/hardware_flash.png)
 
 
 ---
@@ -821,12 +821,12 @@ The LED stays ON for 25% of one PWM cycle, producing low brightness.
 The updated duty register value was verified before rebuilding and flashing the FPGA.
 
 
-![25 Percent Duty Setting](period_duty_25_duty_cycle.png)
+![25 Percent Duty Setting](Images/period_duty_25_duty_cycle.png)
 
 
 Hardware Output:
 
-![25 Percent Hardware Output](dutycycle_25_hardware.jpeg)
+![25 Percent Hardware Output](Images/dutycycle_25_hardware.jpeg)
 
 
 ---
@@ -855,12 +855,12 @@ The LED stays ON for half of the PWM period, producing medium brightness.
 The updated duty register value was verified before rebuilding and flashing the FPGA.
 
 
-![50 Percent Duty Setting](period_duty_50.png)
+![50 Percent Duty Setting](Images/period_duty_50.png)
 
 
 Hardware Output:
 
-![50 Percent Hardware Output](dutucycle_50_hardware.jpeg)
+![50 Percent Hardware Output](Images/dutucycle_50_hardware.jpeg)
 
 
 ---
@@ -889,12 +889,12 @@ The LED remains ON for a longer duration, producing higher brightness.
 The updated duty register value was verified before rebuilding and flashing the FPGA.
 
 
-![75 Percent Duty Setting](period_duty_75.png)
+![75 Percent Duty Setting](Images/period_duty_75.png)
 
 
 Hardware Output:
 
-![75 Percent Hardware Output](dutycycle_75_hardware.jpeg)
+![75 Percent Hardware Output](Images/dutycycle_75_hardware.jpeg)
 
 
 ---
