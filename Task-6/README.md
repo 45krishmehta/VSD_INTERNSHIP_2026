@@ -727,3 +727,232 @@ The project provided practical understanding of hardware-software interaction, m
 
 ---
 
+# Step 10: FPGA Hardware Validation
+
+After completing PWM RTL design, simulation, SoC integration, and software validation, the final step was to verify the PWM IP on the VSDSquadron FPGA hardware.
+
+The PWM output was connected to the onboard LED to observe brightness variation by changing the duty cycle value.
+
+
+## FPGA Board Connection
+
+The FPGA board was connected through USB and verified before programming.
+
+Commands used:
+
+```bash
+ls /dev/ttyUSB*
+
+lsusb
+```
+
+The board was successfully detected through the USB interface.
+
+
+![FPGA Board Detection](hardware_1.png)
+
+
+---
+
+## FPGA Programming
+
+The synthesized SoC design containing the PWM peripheral was programmed onto the FPGA.
+
+Command used:
+
+```bash
+sudo make flash
+```
+
+The FPGA programming completed successfully:
+
+- Bitstream loaded
+- Flash verification completed
+- PWM hardware design activated
+
+
+![FPGA Flash](hardware_flash.png)
+
+
+---
+
+# PWM Duty Cycle Calculation
+
+The brightness of an LED depends on the PWM duty cycle.
+
+Duty cycle is calculated as:
+
+```
+Duty Cycle (%) = (DUTY / PERIOD) × 100
+```
+
+For hardware testing:
+
+```
+PERIOD = 12000000
+```
+
+The PERIOD value was kept constant and DUTY value was changed to generate different brightness levels.
+
+
+---
+
+# Case 1: 25% Duty Cycle
+
+Configuration:
+
+```
+PERIOD = 12000000
+
+DUTY = 3000000
+```
+
+Calculation:
+
+```
+Duty Cycle = (3000000 / 12000000) × 100
+
+Duty Cycle = 0.25 × 100
+
+Duty Cycle = 25%
+```
+
+The LED stays ON for 25% of one PWM cycle, producing low brightness.
+The updated duty register value was verified before rebuilding and flashing the FPGA.
+
+
+![25 Percent Duty Setting](period_duty_25_duty_cycle.png)
+
+
+Hardware Output:
+
+![25 Percent Hardware Output](dutycycle_25_hardware.jpeg)
+
+
+---
+
+# Case 2: 50% Duty Cycle
+
+Configuration:
+
+```
+PERIOD = 12000000
+
+DUTY = 6000000
+```
+
+Calculation:
+
+```
+Duty Cycle = (6000000 / 12000000) × 100
+
+Duty Cycle = 0.5 × 100
+
+Duty Cycle = 50%
+```
+
+The LED stays ON for half of the PWM period, producing medium brightness.
+The updated duty register value was verified before rebuilding and flashing the FPGA.
+
+
+![50 Percent Duty Setting](period_duty_50.png)
+
+
+Hardware Output:
+
+![50 Percent Hardware Output](dutucycle_50_hardware.jpeg)
+
+
+---
+
+# Case 3: 75% Duty Cycle
+
+Configuration:
+
+```
+PERIOD = 12000000
+
+DUTY = 9000000
+```
+
+Calculation:
+
+```
+Duty Cycle = (9000000 / 12000000) × 100
+
+Duty Cycle = 0.75 × 100
+
+Duty Cycle = 75%
+```
+
+The LED remains ON for a longer duration, producing higher brightness.
+The updated duty register value was verified before rebuilding and flashing the FPGA.
+
+
+![75 Percent Duty Setting](period_duty_75.png)
+
+
+Hardware Output:
+
+![75 Percent Hardware Output](dutycycle_75_hardware.jpeg)
+
+
+---
+
+# Hardware Result
+
+The PWM IP was successfully validated on FPGA hardware.
+
+Verification completed:
+
+- PWM output generated successfully
+- FPGA LED controlled using PWM signal
+- Duty cycle variation changed LED brightness
+- Hardware output matched expected PWM behavior
+
+
+| Duty Cycle | Observation |
+|----------|-------------|
+| 25% | Low LED brightness |
+| 50% | Medium LED brightness |
+| 75% | High LED brightness |
+
+
+---
+
+# We can say that , 
+
+The hardware validation confirms the successful implementation of the PWM peripheral IP.
+
+The complete flow from RISC-V software control to FPGA LED output was verified, demonstrating proper SoC integration and real hardware functionality.
+
+---
+
+---
+
+# Final Result
+
+The PWM Peripheral IP development was successfully completed and validated.
+
+The complete design flow achieved:
+
+- Designed a custom PWM IP using Verilog RTL
+- Implemented memory-mapped register interface
+- Integrated PWM peripheral with RISC-V SoC
+- Verified functionality using simulation and GTKWave
+- Validated software control through firmware
+- Synthesized and programmed the design on VSDSquadron FPGA board
+- Verified PWM output using onboard LED brightness control
+
+
+---
+
+# Conclusion
+
+This task demonstrated the complete hardware IP development flow used in FPGA and SoC design.
+
+The PWM peripheral was successfully designed, integrated, and tested from RTL level to real FPGA hardware. Changing the duty cycle values correctly controlled the PWM output, confirming proper communication between software, RISC-V processor, and the custom hardware IP.
+
+The implementation successfully validates the complete hardware-software co-design flow.
+
+---
