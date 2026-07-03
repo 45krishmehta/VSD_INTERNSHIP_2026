@@ -42,7 +42,7 @@ spike pk sum1ton.o
 
 ### Screenshot
 
-![SPIKE Simulation Output](gcc_spike_outpt.png)
+![SPIKE Simulation Output](Images/gcc_spike_outpt.png)
 
 ### Observation
 
@@ -78,7 +78,7 @@ Before debugging, the executable was disassembled to identify the instructions g
 riscv64-unknown-elf-objdump -d sum1ton.o
 ```
 
-![Assembly Reference](assembly_ref_debug.png)
+![Assembly Reference](Images/assembly_ref_debug.png)
 
 From the disassembly, the `main()` function begins at address:
 
@@ -116,7 +116,7 @@ which corresponds to:
 addi sp, sp, -16
 ```
 
-![Stack Pointer Debugging](debug_2.png)
+![Stack Pointer Debugging](Images/debug_2.png)
 
 Before execution, the stack pointer contained:
 
@@ -150,7 +150,7 @@ The debugger clearly shows how a single instruction modifies the processor state
 
 The next step was to observe how registers change when instructions are executed.
 
-![Register Debugging](debug_thrgh_spike.png)
+![Register Debugging](Images/debug_thrgh_spike.png)
 
 The following instructions were executed:
 
@@ -289,7 +289,7 @@ The elevator controller program was created and edited using the gedit text edit
 
 ### Source Code Screenshot
 
-![Elevator Code](gedit_elevator_code.png)
+![Elevator Code](Images/gedit_elevator_code.png)
 
 ### Source Code
 
@@ -355,7 +355,7 @@ gcc elevator.c
 
 ### Output
 
-![GCC Output](gcc_output_elevator.png)
+![GCC Output](Images/gcc_output_elevator.png)
 
 ### Observation
 
@@ -375,7 +375,7 @@ riscv64-unknown-elf-gcc -O1 -mabi=lp64 -march=rv64i -o elevator.o elevator.c
 
 ### Generated Object File
 
-![O1 Object Generation](o1_obj_elevator.png)
+![O1 Object Generation](Images/o1_obj_elevator.png)
 
 ---
 
@@ -391,7 +391,7 @@ riscv64-unknown-elf-objdump -d elevator.o
 
 ### Assembly Output
 
-![O1 Assembly](obj_01_code_elevator.png)
+![O1 Assembly](Images/obj_01_code_elevator.png)
 
 ### Observation
 
@@ -421,7 +421,7 @@ riscv64-unknown-elf-gcc -Ofast -mabi=lp64 -march=rv64i -o elevator.o elevator.c
 
 ### Generated Object File
 
-![Ofast Object Generation](0fast_elevator_code.png)
+![Ofast Object Generation](Images/0fast_elevator_code.png)
 
 ---
 
@@ -431,7 +431,7 @@ The optimized executable was disassembled to observe the effect of compiler opti
 
 ### Assembly Output
 
-![Ofast Assembly](0fast_elevator_output.png)
+![Ofast Assembly](Images/0fast_elevator_output.png)
 
 ### Observation
 
@@ -451,7 +451,7 @@ spike pk elevator.o
 
 ### Output
 
-![SPIKE Output](spike_elevatot.png)
+![SPIKE Output](Images/spike_elevatot.png)
 
 ### Observation
 
