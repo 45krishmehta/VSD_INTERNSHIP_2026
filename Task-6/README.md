@@ -202,3 +202,96 @@ The testbench includes:
 
 ---
 
+---
+
+# Step 4: PWM Simulation Verification
+
+After completing the RTL implementation and testbench development, the PWM IP was verified using simulation tools.
+
+The simulation flow verifies whether the PWM module correctly responds to register configuration and generates the expected output waveform.
+
+
+## Simulation Setup
+
+The RTL file was copied into the PWM test directory and compiled together with the testbench.
+
+Simulation tools used:
+
+- Icarus Verilog (iverilog)
+- GTKWave waveform analyzer
+
+
+Commands used for simulation:
+
+```bash
+cp ../rtl/pwm_ip.v .
+
+iverilog -o pwm_sim pwm_ip.v pwm_tb.v
+
+vvp pwm_sim
+
+gtkwave pwm.vcd
+```
+
+
+The simulation successfully generated the VCD waveform dump file without compilation errors.
+
+
+![PWM Simulation](compilation_simulation_pwm.png)
+
+
+---
+
+## GTKWave Verification
+
+The generated `pwm.vcd` file was analyzed using GTKWave.
+
+Observed signals:
+
+- clk
+- reset
+- write_en
+- reg_sel
+- write_data
+- pwm_out
+
+
+During simulation:
+
+- CTRL register enables PWM operation.
+- PERIOD register is configured with the required count value.
+- DUTY register controls the ON time of PWM output.
+- pwm_out toggles according to the programmed duty cycle.
+
+
+Test configuration:
+
+| Parameter | Value |
+|---|---|
+| PERIOD | 10 |
+| DUTY | 4 |
+| Duty Cycle | ~40% |
+
+
+The waveform confirms correct PWM generation based on the programmed register values.
+
+
+![PWM GTKWave Output](gtkwave_pwm_2.png)
+
+
+---
+
+## Simulation Result
+
+The PWM IP successfully passed functional verification.
+
+Verified operations:
+
+✔ Register write functionality  
+✔ PWM counter operation  
+✔ Duty cycle generation  
+✔ PWM output waveform behavior  
+
+This confirms that the PWM peripheral RTL works correctly before SoC integration and FPGA implementation.
+
+---
