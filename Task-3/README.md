@@ -49,7 +49,7 @@ The execution completed successfully without any compilation or runtime errors.
 
 ## Execution Output
 
-![Execution Output](codspace_gcc_spike_sim.png)
+![Execution Output](Images/codspace_gcc_spike_sim.png)
 
 ---
 
@@ -73,7 +73,7 @@ patchutils bc zlib1g-dev libexpat1-dev gtkwave picocom -y
 
 ### Output
 
-![General Dependencies Installation](install_1.png)
+![General Dependencies Installation](Images/install_1.png)
 
 ---
 
@@ -89,7 +89,7 @@ During execution, the system reported that the **icestorm** package could not be
 
 ### Output
 
-![FPGA Toolchain Installation](install_2.png)
+![FPGA Toolchain Installation](Images/install_2.png)
 
 ---
 
@@ -113,7 +113,7 @@ source ~/.bashrc
 
 ### Output
 
-![RISC-V Toolchain Configuration](install_3.png)
+![RISC-V Toolchain Configuration](Images/install_3.png)
 
 ---
 
@@ -147,7 +147,7 @@ This command navigates into the cloned project directory, allowing access to the
 
 ### Output
 
-![Repository Clone](git_clone_vsdlabs.png)
+![Repository Clone](Images/git_clone_vsdlabs.png)
 
 ---
 
@@ -181,7 +181,7 @@ The `make` command compiles the firmware and generates `riscv_logo.bram.hex`, wh
 
 ### Output
 
-![Firmware Generation](bram.hex_op.png)
+![Firmware Generation](Images/bram.hex_op.png)
 
 ---
 
@@ -215,11 +215,11 @@ The `make build` command automatically performs synthesis, placement, routing, t
 
 ### Build Commands
 
-![Build Commands](make_build_clean_code_vm.png)
+![Build Commands](Images/make_build_clean_code_vm.png)
 
 ### Build Output
 
-![Build Output](make_build_long_outpt.png)
+![Build Output](Images/make_build_long_outpt.png)
 
 ### Step 4: Flash to FPGA
 
@@ -235,7 +235,7 @@ The `make flash` command invokes the programming utility (`iceprog`) to transfer
 
 ### Output
 
-![Flash Output](step4_sudomake_terminal_vm.png)
+![Flash Output](Images/step4_sudomake_terminal_vm.png)
 
 ---
 
@@ -284,7 +284,7 @@ After executing the previous firmware generation and build steps, the RISC-V app
 
 ### Output
 
-![RISC-V Logo Output in GitHub Codespace](banner_op_github_terminal.png)
+![RISC-V Logo Output in GitHub Codespace](Images/banner_op_github_terminal.png)
 
 ---
 
@@ -319,7 +319,7 @@ The first command navigates to the **Firmware** directory containing the RISC-V 
 
 ### Output
 
-![Local Workspace Verification](vm_setup_step4.png)
+![Local Workspace Verification](Images/vm_setup_step4.png)
 
 ---
 
@@ -331,7 +331,7 @@ The default **VSDSquadron FPGA Mini** ASCII banner was successfully verified on 
 
 The `riscv_logo.c` file contains the implementation responsible for displaying the ASCII banner.
 
-![Firmware Source](banner_output_code.png)
+![Firmware Source](Images/banner_output_code.png)
 
 ---
 
@@ -339,7 +339,7 @@ The `riscv_logo.c` file contains the implementation responsible for displaying t
 
 The following output was observed after executing the previously generated firmware on the local machine.
 
-![RISC-V Banner Output](ascii_banner.png)
+![RISC-V Banner Output](Images/ascii_banner.png)
 
 ---
 
@@ -470,7 +470,7 @@ This command opens the Mandelbrot firmware source in the Nano text editor, allow
 
 ### Source File
 
-![mandel.c Source](mandle.c_optional_initial_state.png)
+![mandel.c Source](Images/mandle.c_optional_initial_state.png)
 
 ---
 
@@ -509,7 +509,7 @@ make build
 
 ### Commands Executed
 
-![Build Commands](optional_code.png)
+![Build Commands](Images/optional_code.png)
 
 ---
 
@@ -519,7 +519,7 @@ After rebuilding, the modified `mandel.c` file was reviewed to confirm that the 
 
 ### Verification
 
-![Updated mandel.c](optional_mandle_final_change.png)
+![Updated mandel.c](Images/optional_mandle_final_change.png)
 
 ---
 
