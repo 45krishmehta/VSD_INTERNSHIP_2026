@@ -1,70 +1,71 @@
 # PWM IP User Guide
 
-
 ## 1. IP Overview
 
+The PWM (Pulse Width Modulation) IP is a configurable hardware module designed for the VSDSquadron FPGA RISC-V SoC.
 
-The PWM (Pulse Width Modulation) IP is a configurable hardware module developed for the VSDSquadron FPGA RISC-V SoC platform.
+It generates PWM waveforms by controlling the ON and OFF duration of the output signal through software programmable registers.
 
-It generates PWM output signals by controlling the ON time and OFF time of a digital waveform.
-
-The IP is controlled through software programmable memory mapped registers.
-
+The IP allows the RISC-V processor to configure PWM behaviour without modifying RTL.
 
 ## Purpose
 
-
-The purpose of this IP is to provide a reusable hardware PWM generator that allows software control of waveform characteristics without modifying RTL logic.
-
+The purpose of this IP is to provide a reusable hardware PWM generator for FPGA applications.
 
 ## Typical Use Cases
 
-
 - LED brightness control
 - Motor speed control
-- Digital signal generation
+- Digital waveform generation
 - Hardware timing applications
-
-
-## Why Use This IP?
-
-
-The PWM IP reduces processor workload by generating continuous PWM signals in hardware after initial software configuration.
 
 
 ---
 
+# 2. Feature Summary
 
-## 2. Feature Summary
+Features:
 
-
-Supported features:
-
-- Single PWM output channel
-- 32-bit period register
-- 32-bit duty cycle register
+- Single channel PWM output
+- 32-bit period configuration
+- 32-bit duty cycle configuration
 - Software controlled enable
 - Memory mapped register interface
-- RISC-V processor compatibility
+- VSDSquadron FPGA compatible
 
 
 ## Clock Assumptions
 
-
-- Uses VSDSquadron FPGA system clock
-- PWM frequency depends on configured period value
+- Uses system clock provided by VSDSquadron FPGA SoC
 
 
 ## Limitations
 
-
 - Single channel PWM only
 - No interrupt support
-- No automatic duty cycle update mode
+- No automatic duty cycle update
 
 
 ---
 
+# 3. Block Diagram
 
-## 3. Block Diagram
 
+        RISC-V CPU
+             |
+        Memory Bus
+             |
+     Register Interface
+             |
+      PWM Counter Logic
+             |
+        Comparator
+             |
+        PWM Output
+
+
+# Known Limitations
+
+- No interrupt generation
+- Single PWM channel
+- Software controlled configuration only
