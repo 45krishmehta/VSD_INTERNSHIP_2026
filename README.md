@@ -31,4 +31,4 @@ This repository contains all tasks, reports, screenshots, assembly analysis, and
 ### 🔹 [Task 6:  Real Peripheral IP Development (PWM IP)... ](./Task-6/README.md)
 
 
-### 🔹 [Task 7:  Commercial-Grade IP Documentation & Release ](./Task-7/README.md)
+### 🔹 [Task 7:  Commercial-Grade IP Documentation](./Task-7/README.md)
