@@ -20,11 +20,14 @@ Users can configure frequency and duty cycle without modifying RTL.
 - Easy FPGA integration
 
 ---
-
 ## Folder Structure
 
-```
-Task-7
+The PWM IP release package follows a commercial IP directory structure:
+
+```text
+Task-7/
+
+├── README.md
 
 ├── rtl/
 │   └── pwm_ip.v
@@ -38,8 +41,31 @@ Task-7
 │   ├── Integration_Guide.md
 │   └── Example_Usage.md
 
-└── README.md
+└── images/
+    ├── gtkwave_pwm_2.png
+    ├── dutycycle_50_hardware.jpeg
+    ├── hardware_flash.png
+    ├── period_duty_50.png
+    ├── pwm_validation_build.png
+    ├── pwm_validation_code.png
+    └── soc_build_success.png
 ```
+---
+
+## Terminal verification output:
+
+![PWM IP Folder Structure](images/folder_structure.png)
+
+---
+
+### Directory Description
+
+| Directory | Description |
+|----------|-------------|
+| rtl | Contains PWM Verilog RTL design files |
+| software | Contains RISC-V software examples for PWM configuration |
+| docs | Contains IP documentation, register details and integration guide |
+| images | Contains simulation and hardware validation results |
 
 ---
 
