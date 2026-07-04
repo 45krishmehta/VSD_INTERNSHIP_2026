@@ -1,4 +1,4 @@
-# PWM IP for VSDSquadron FPGA
+#  Commercial-Grade PWM IP 
 
 ## Overview
 
@@ -88,6 +88,48 @@ Duty Cycle = DUTY / PERIOD × 100
 - Build software
 - Program VSDSquadron FPGA
 - Observe PWM output
+
+---
+
+## Known Limitations & Notes
+
+Commercial IP releases include design assumptions and current limitations.
+
+### Limitations
+
+- Supports single PWM output channel only
+
+- No interrupt generation support
+
+- No automatic duty cycle update mode
+
+- Duty cycle and period values are configured through software registers
+
+- PWM output frequency depends on the system clock frequency
+
+
+### Design Assumptions
+
+- Uses VSDSquadron FPGA system clock
+
+- Register interface uses 32-bit memory mapped access
+
+- Processor configures PWM before waveform generation
+
+- PWM output pin should be mapped correctly using FPGA constraint file
+
+
+### Future Improvements
+
+Possible future enhancements:
+
+- Multi-channel PWM support
+
+- Interrupt based PWM events
+
+- Dynamic frequency scaling support
+
+- Advanced waveform generation modes
 
 ---
 
